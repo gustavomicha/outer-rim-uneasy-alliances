@@ -1,0 +1,9 @@
+# Source PDFs — get them yourself (see README), they are not redistributed here
+*.pdf
+
+# local stuff
+.DS_Store
+.claude/
+venv/
+__pycache__/
+printed_example.webp

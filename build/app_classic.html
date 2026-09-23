@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uneasy Alliances</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --panel: #131a2c;
+  --panel-2: #1a2238;
+  --line: #2a3452;
+  --text: #e6e9f2;
+  --muted: #8f99b5;
+  --gold: #f2c14e;
+  --gold-dim: #a8842f;
+  --red: #e5534b;
+  --green: #57b36a;
+  --blue: #5b9bd5;
+  --p1: #4fb3d9;
+  --p2: #e08a4f;
+  --radius: 10px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: radial-gradient(1200px 700px at 70% -10%, #1b2446 0%, var(--bg) 60%) fixed, var(--bg);
+  color: var(--text);
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+}
+button {
+  font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 7px; padding: 6px 11px; cursor: pointer; white-space: nowrap;
+}
+button:hover:not(:disabled) { border-color: var(--gold-dim); background: #222c48; }
+button:disabled { opacity: .4; cursor: default; }
+button.primary { background: var(--gold); color: #1a1405; border-color: var(--gold); font-weight: 600; }
+button.primary:hover:not(:disabled) { background: #ffd36b; }
+button.danger { color: #ffb4ae; }
+button.p1 { border-color: color-mix(in srgb, var(--p1) 55%, var(--line)); }
+button.p2 { border-color: color-mix(in srgb, var(--p2) 55%, var(--line)); }
+input[type=text], input[type=number] {
+  font: inherit; color: var(--text); background: #0d1324; border: 1px solid var(--line);
+  border-radius: 7px; padding: 6px 9px;
+}
+h1, h2, h3 { margin: 0; font-weight: 600; }
+.muted { color: var(--muted); }
+.stars { color: var(--gold); letter-spacing: 1px; }
+
+/* ---------- top bar ---------- */
+.topbar {
+  display: flex; align-items: center; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--line);
+  background: rgba(10, 14, 26, .85); position: sticky; top: 0; z-index: 20; backdrop-filter: blur(6px);
+}
+.topbar h1 { font-size: 16px; letter-spacing: .5px; }
+.topbar .info { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.chip { background: var(--panel-2); border: 1px solid var(--line); border-radius: 99px; padding: 3px 10px; font-size: 13px; }
+.chip b { color: var(--gold); }
+.topbar .spacer { flex: 1; }
+.topbar .actions { display: flex; gap: 6px; }
+
+/* ---------- board ---------- */
+.board {
+  display: grid; gap: 14px; padding: 14px 18px 30px;
+  grid-template-columns: minmax(460px, 1.25fr) minmax(560px, 1.2fr);
+  align-items: start;
+}
+.stack { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }
+.panel > header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.panel > header h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); }
+.panel > header .count { margin-left: auto; font-size: 13px; }
+.row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 6px; }
+
+/* ---------- cards ---------- */
+.card {
+  position: relative; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,.45); cursor: zoom-in; flex: none;
+}
+.card .inner { position: absolute; inset: 0; transition: transform .45s ease; }
+.card.rot .inner { transform: rotate(180deg); }
+.card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card .dim { position: absolute; left: 0; right: 0; height: 50%; background: rgba(8, 10, 20, .62); pointer-events: none; }
+.card .dim.top { top: 0; } .card .dim.bottom { bottom: 0; }
+.card .tag {
+  position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,.72); color: #fff; font-size: 11px;
+  padding: 1px 6px; border-radius: 99px; pointer-events: none;
+}
+.numback {
+  width: 100%; height: 100%; background: #fbfaf7; color: #111; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; font: 700 clamp(28px, 22cqw, 64px) Georgia, "Times New Roman", serif;
+  container-type: inline-size;
+}
+.numback small { font-size: .35em; letter-spacing: 3px; margin-top: -.25em; }
+.pile { position: relative; }
+.pile .badge {
+  position: absolute; right: -6px; top: -6px; background: var(--gold); color: #1a1405; font-weight: 700;
+  border-radius: 99px; min-width: 26px; padding: 2px 7px; text-align: center; font-size: 13px; z-index: 2;
+  box-shadow: 0 2px 6px rgba(0,0,0,.5);
+}
+.pile.stacked .card { box-shadow: 2px 2px 0 #cfc9b8, 4px 4px 0 #b9b3a3, 6px 6px 0 #9d9888, 0 8px 18px rgba(0,0,0,.5); }
+.emptyslot {
+  aspect-ratio: 3 / 4; border: 2px dashed var(--line); border-radius: 8px; display: flex; align-items: center;
+  justify-content: center; color: var(--muted); text-align: center; padding: 10px; font-size: 13px;
+}
+@keyframes flipIn { from { transform: rotateY(90deg) scale(.96); } to { transform: rotateY(0) scale(1); } }
+.flipping { animation: flipIn .38s ease-out; }
+@keyframes flipBack { 0% { transform: rotateY(0); } 100% { transform: rotateY(90deg); } }
+
+/* ---------- scenario sheet ---------- */
+.sheetwrap { position: relative; aspect-ratio: 612 / 395; border-radius: 8px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,.5); }
+.sheetwrap img { width: 100%; height: 100%; display: block; }
+.dot {
+  position: absolute; aspect-ratio: 1; border-radius: 50%; border: 0; padding: 0; background: transparent;
+  cursor: pointer; transition: background .15s, box-shadow .15s;
+}
+.dot:hover { box-shadow: 0 0 0 3px rgba(242, 193, 78, .8); background: rgba(242, 193, 78, .15); }
+.dot.on {
+  background: radial-gradient(circle at 35% 30%, #ffe9a8, #f2c14e 45%, #9c6f12 100%);
+  box-shadow: 0 0 0 2px #3b2a05, 0 2px 8px rgba(0,0,0,.6);
+}
+.dot.on::after {
+  content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #3b2a05; font-weight: 900; font-size: clamp(10px, 1.3vw, 20px);
+}
+.sheetbar { display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.fame { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+.famebox { display: flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; }
+.famebox .n { min-width: 36px; text-align: center; font-weight: 700; font-size: 16px; }
+.famebox.done .n { color: var(--green); }
+.fameboxname { font-weight: 600; }
+.fameboxname.p1 { color: var(--p1); } .fameboxname.p2 { color: var(--p2); }
+.fameboxname.p1::before, .fameboxname.p2::before { content: "●"; margin-right: 5px; }
+.fameboxbtn { padding: 1px 9px; }
+
+/* ---------- event ---------- */
+.decktop { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: start; }
+.current { margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.current .card { width: min(100%, 240px); }
+.current .emptyslot { width: min(100%, 240px); }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.turn { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.turn .who { font-weight: 700; }
+.who.p1 { color: var(--p1); } .who.p2 { color: var(--p2); }
+.discardthumb { width: 96px; margin-top: 8px; }
+
+/* ---------- numbered ---------- */
+.numlayout { display: grid; grid-template-columns: 1fr 230px; gap: 16px; align-items: start; }
+.numgrid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-top: 10px; }
+.numbtn {
+  height: 36px; padding: 0; display: flex; align-items: center; justify-content: center;
+  font: 700 15px Georgia, serif; position: relative; background: #f4f1e8; color: #1c1c1c;
+  border-color: #cfc8b4;
+}
+.numbtn:hover:not(:disabled) { background: #fff; border-color: var(--gold); }
+.numbtn.scen { box-shadow: inset 0 -3px 0 var(--gold); background: #fff4d2; }
+.numbtn .dots { position: absolute; left: 0; right: 0; bottom: 1px; font-size: 9px; line-height: 1; letter-spacing: 1px; }
+.numbtn:disabled { background: #2a2f3e; color: #6b7390; border-color: var(--line); opacity: 1; }
+.legend { font-size: 12px; margin-top: 8px; }
+.num .current { margin-top: 0; }
+
+/* ---------- hands ---------- */
+.hands { display: flex; flex-direction: column; gap: 14px; }
+.hand h3 { font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.hand.p1 { border-top: 3px solid var(--p1); }
+.hand.p2 { border-top: 3px solid var(--p2); }
+.handcards { display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px; margin-top: 10px; }
+.handcards .card { width: 118px; }
+
+/* ---------- modal ---------- */
+.modalback {
+  position: fixed; inset: 0; background: rgba(3, 5, 12, .8); z-index: 50; display: flex;
+  align-items: center; justify-content: center; padding: 24px;
+}
+.modal {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; max-width: 96vw;
+  max-height: 94vh; overflow: auto; display: flex; flex-direction: column; gap: 12px;
+}
+.modal header { display: flex; align-items: center; gap: 10px; }
+.modal header h2 { font-size: 16px; }
+.modal header .x { margin-left: auto; }
+.bigcard { display: flex; gap: 18px; align-items: flex-start; }
+.bigcard .card { height: min(78vh, 720px); width: auto; cursor: default; }
+.bigcard .col { min-width: 190px; }
+.bigcard .col button { text-align: left; }
+.pilegrid { display: grid; grid-template-columns: repeat(auto-fill, 130px); gap: 12px; width: min(90vw, 1000px); }
+.bigsheet { width: min(92vw, 1400px); }
+.log { width: min(640px, 90vw); font-size: 13px; }
+.log div { padding: 4px 0; border-bottom: 1px solid var(--line); }
+.log time { color: var(--muted); margin-right: 8px; font-variant-numeric: tabular-nums; }
+
+.banner { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: rgba(3,5,12,.82); }
+.banner .box { text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 30px 40px; max-width: 520px; }
+.banner h2 { font-size: 28px; margin-bottom: 8px; }
+.banner.lost h2 { color: var(--red); }
+.banner.won h2 { color: var(--gold); }
+
+.toast {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: #222c48; border: 1px solid var(--gold-dim);
+  padding: 9px 16px; border-radius: 8px; z-index: 70; box-shadow: 0 6px 20px rgba(0,0,0,.5);
+}
+
+/* ---------- setup ---------- */
+.setup { max-width: 1180px; margin: 0 auto; padding: 26px 20px 60px; }
+.setup h1 { font-size: 28px; }
+.setup .sub { color: var(--muted); margin: 4px 0 22px; }
+.setup h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin: 22px 0 10px; }
+.scengrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.scen {
+  text-align: left; padding: 0; overflow: hidden; border-radius: 10px; background: var(--panel); display: flex; flex-direction: column;
+  white-space: normal;
+}
+.scen img { width: 100%; aspect-ratio: 612 / 395; object-fit: cover; display: block; }
+.scen .meta { padding: 8px 10px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.scen.sel { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
+.diffs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.diff { text-align: left; padding: 12px 14px; white-space: normal; }
+.diff b { font-size: 16px; display: block; }
+.diff.sel { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
+.names { display: flex; gap: 14px; flex-wrap: wrap; }
+.names label { display: flex; flex-direction: column; gap: 4px; }
+.summary { margin-top: 22px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.summary .spacer { flex: 1; }
+button.primary kbd { background: rgba(0,0,0,.12); border-color: rgba(0,0,0,.3); color: inherit; }
+kbd { background: #0d1324; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 12px; }
+
+@media (max-width: 1100px) {
+  .board { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .board { padding: 10px; }
+  .duo { grid-template-columns: 1fr; }
+  .numlayout { grid-template-columns: 1fr; }
+  .bigcard { flex-direction: column; }
+  .bigcard .card { height: auto; width: 100%; }
+  .diffs { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="overlay"></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const IMAGES = /*__IMAGES__*/null;
+
+// ------------------------------------------------------------------ images -> blob URLs
+const URLS = {};
+for (const [k, v] of Object.entries(IMAGES)) {
+  const b64 = v.slice(v.indexOf(",") + 1);
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  URLS[k] = URL.createObjectURL(new Blob([bytes], { type: "image/webp" }));
+}
+
+// ------------------------------------------------------------------ static data
+const CARDS = {};
+for (const c of [...DATA.events, ...DATA.numbered, ...DATA.jobs]) CARDS[c.id] = c;
+const SCEN = Object.fromEntries(DATA.scenarios.map(s => [s.id, s]));
+const DIFF = {
+  easy: { label: "Easy", fame: 6, remove: 10 },
+  medium: { label: "Medium", fame: 8, remove: 6 },
+  hard: { label: "Hard", fame: 10, remove: 2 },
+};
+const DUP_NUMS = new Set(DATA.numbered.filter((c, i, a) => a.findIndex(x => x.num === c.num) !== i).map(c => c.num));
+const SAVE_KEY = "uneasy-alliances-save-v1";
+
+// ------------------------------------------------------------------ state
+let state = null;
+let history = [];
+const ui = { modal: null, flip: null, sheetFlip: false, toast: null, setup: { scenario: null, difficulty: "medium", p1: "Player 1", p2: "Player 2" } };
+
+function save() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function loadSaved() {
+  try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.v === 1 ? s : null; } catch (e) { return null; }
+}
+function clearSaved() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+}
+
+function rand(n) {
+  const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n;
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const name = p => state.names[p];
+const other = p => (p === "p1" ? "p2" : "p1");
+
+function log(msg) {
+  const t = new Date();
+  state.log.unshift({ t: t.toTimeString().slice(0, 5), msg });
+  if (state.log.length > 300) state.log.length = 300;
+}
+
+// every state change goes through here: snapshot for undo, mutate, save, render
+function act(fn) {
+  const snap = JSON.stringify(state);
+  const result = fn();
+  if (result === false) return;
+  history.push(snap);
+  if (history.length > 150) history.shift();
+  save();
+  render();
+}
+function undo() {
+  if (!history.length) return;
+  state = JSON.parse(history.pop());
+  ui.modal = null;
+  save();
+  toast("Undone");
+  render();
+}
+
+function toast(msg) {
+  ui.toast = msg;
+  renderOverlay();
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => { ui.toast = null; renderOverlay(); }, 2200);
+}
+
+// ------------------------------------------------------------------ game setup
+function newGame(scenario, difficulty, names) {
+  const d = DIFF[difficulty];
+  const generic = shuffle(DATA.events.filter(e => !e.top).map(e => e.id));
+  const setupRemoved = generic.splice(0, d.remove);
+  const thematic = DATA.events.filter(e => e.top === scenario || e.bottom === scenario).map(e => e.id);
+  const sc = SCEN[scenario];
+  state = {
+    v: 1, scenario, difficulty, names,
+    side: "A",
+    marks: { A: sc.circlesA.map(() => false), B: sc.circlesB.map(() => false) },
+    fame: { p1: 0, p2: 0 },
+    active: "p1",
+    eventDeck: shuffle([...generic, ...thematic]),
+    eventCurrent: null,
+    eventDiscard: [],
+    setupRemoved,
+    numDeck: DATA.numbered.map(c => c.id),
+    numCurrent: null,
+    jobDeck: shuffle(DATA.jobs.map(c => c.id)),
+    hands: { p1: [], p2: [] },
+    removed: [],
+    rot: {},
+    whole: {},
+    log: [],
+    lost: false,
+    won: false,
+    wonSeen: false,
+  };
+  log(`New game: ${sc.name} (${d.label}). Event deck ${state.eventDeck.length} cards (${thematic.length} themed, ${d.remove} generic removed).`);
+  history = [];
+  save();
+}
+
+// ------------------------------------------------------------------ card movement
+function label(id) {
+  const c = CARDS[id];
+  if (c.kind === "num") return `#${c.num}`;
+  if (c.kind === "job") return "co-op job";
+  return "event card";
+}
+
+function detach(id) {
+  const s = state;
+  if (s.eventCurrent === id) s.eventCurrent = null;
+  if (s.numCurrent === id) s.numCurrent = null;
+  for (const key of ["eventDeck", "eventDiscard", "numDeck", "jobDeck", "removed"]) {
+    const i = s[key].indexOf(id); if (i >= 0) s[key].splice(i, 1);
+  }
+  for (const p of ["p1", "p2"]) { const i = s.hands[p].indexOf(id); if (i >= 0) s.hands[p].splice(i, 1); }
+}
+
+function where(id) {
+  const s = state;
+  if (s.eventCurrent === id) return "eventCurrent";
+  if (s.numCurrent === id) return "numCurrent";
+  if (s.hands.p1.includes(id)) return "p1";
+  if (s.hands.p2.includes(id)) return "p2";
+  for (const key of ["eventDiscard", "removed", "jobDeck", "numDeck", "eventDeck"]) if (s[key].includes(id)) return key;
+  return null;
+}
+
+function moveTo(id, dest) {
+  detach(id);
+  if (dest !== "p1" && dest !== "p2") delete state.rot[id];
+  switch (dest) {
+    case "p1": case "p2": state.hands[dest].push(id); log(`${name(dest)} takes ${label(id)}`); break;
+    case "discard": state.eventDiscard.push(id); log(`Discarded ${label(id)}`); break;
+    case "numDeck": state.numDeck.push(id); log(`Returned ${label(id)} to the numbered deck`); break;
+    case "jobBottom": state.jobDeck.push(id); log(`Put ${label(id)} on the bottom of the job market`); break;
+    case "removed": state.removed.push(id); log(`Removed ${label(id)} from the game`); break;
+    case "eventTop": state.eventDeck.unshift(id); log(`Put ${label(id)} back on top of the event deck`); break;
+  }
+}
+
+function returnDest(id) {
+  const k = CARDS[id].kind;
+  return k === "event" ? "discard" : k === "num" ? "numDeck" : "jobBottom";
+}
+function returnLabel(id) {
+  const k = CARDS[id].kind;
+  return k === "event" ? "Discard" : k === "num" ? "Return to numbered deck" : "Bottom of job market";
+}
+
+// ------------------------------------------------------------------ actions
+const A = {
+  drawEvent() {
+    act(() => {
+      const p = state.active;
+      if (!state.eventDeck.length) { state.lost = true; log(`${name(p)} could not draw: the event deck is empty. Game lost.`); return; }
+      if (state.eventCurrent) moveTo(state.eventCurrent, "discard");
+      state.eventCurrent = state.eventDeck.shift();
+      ui.flip = state.eventCurrent;
+      log(`${name(p)} draws an event (${state.eventDeck.length} left)`);
+      state.active = other(p);
+    });
+  },
+  defeatedDiscard() {
+    act(() => {
+      const p = state.active;
+      if (!state.eventDeck.length) { state.lost = true; log(`Event deck empty. Game lost.`); return; }
+      if (state.eventCurrent) moveTo(state.eventCurrent, "discard");
+      state.eventDiscard.push(state.eventDeck.shift());
+      log(`${name(p)} was defeated: top event card discarded unseen (${state.eventDeck.length} left)`);
+      state.active = other(p);
+    });
+  },
+  setActive(p) { act(() => { state.active = p; }); },
+  revealNum(n) {
+    n = Number(n);
+    if (!(n >= 101 && n <= 148)) { toast("Enter a card number from 101 to 148"); return; }
+    const copies = state.numDeck.filter(id => CARDS[id].num === n);
+    if (!copies.length) {
+      const out = DATA.numbered.filter(c => c.num === n).map(c => where(c.id));
+      toast(`#${n} is not in the deck (${out.map(w => w === "p1" || w === "p2" ? `in ${name(w)}'s hand` : w === "numCurrent" ? "revealed" : "removed from game").join(", ")})`);
+      return;
+    }
+    act(() => {
+      if (state.numCurrent) moveTo(state.numCurrent, "numDeck");
+      const id = copies[rand(copies.length)];
+      detach(id);
+      state.numCurrent = id;
+      ui.flip = id;
+      log(`Revealed card #${n}${copies.length > 1 ? " (random version)" : ""}`);
+    });
+  },
+  jobShuffle() { act(() => { state.jobDeck = shuffle(state.jobDeck); log("Shuffled the job market"); }); toast("Job market shuffled"); },
+  jobTopToBottom() {
+    if (state.jobDeck.length < 2) return;
+    act(() => { state.jobDeck.push(state.jobDeck.shift()); log("Moved the top job to the bottom"); });
+  },
+  jobGain(p) {
+    if (!state.jobDeck.length) return;
+    act(() => { moveTo(state.jobDeck[0], p); });
+  },
+  move(id, dest) { act(() => { moveTo(id, dest); if (ui.modal && ui.modal.type === "card") ui.modal = null; }); },
+  rotate(id) { act(() => { state.rot[id] = !state.rot[id]; }); },
+  toggleWhole(id) { state.whole[id] = !state.whole[id]; save(); render(); },
+  toggleDot(side, i) {
+    act(() => {
+      state.marks[side][i] = !state.marks[side][i];
+      if (side === "B" && state.marks.B.length && state.marks.B[state.marks.B.length - 1] && !state.wonSeen) { state.won = true; state.wonSeen = true; }
+      log(`${state.marks[side][i] ? "Marked" : "Unmarked"} progress circle ${i + 1} on side ${side}`);
+    });
+  },
+  flipSheet() { act(() => { state.side = state.side === "A" ? "B" : "A"; ui.sheetFlip = true; log(`Flipped the scenario sheet to side ${state.side}`); }); },
+  fame(p, d) { act(() => { state.fame[p] = Math.max(0, state.fame[p] + d); log(`${name(p)} fame ${state.fame[p]}`); }); },
+};
+
+// ------------------------------------------------------------------ render helpers
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function cardHTML(id, { cls = "", style = "", zoom = true, tag = "" } = {}) {
+  const c = CARDS[id];
+  let dim = "";
+  if (c.kind === "event" && c.top && !state.whole[id]) {
+    if (c.top === state.scenario && c.bottom !== state.scenario) dim = `<div class="dim bottom"></div>`;
+    else if (c.bottom === state.scenario && c.top !== state.scenario) dim = `<div class="dim top"></div>`;
+  }
+  const flip = ui.flip === id ? " flipping" : "";
+  return `<div class="card${state.rot[id] ? " rot" : ""}${flip} ${cls}" style="${style}" ${zoom ? `data-zoom="${id}"` : ""}>
+    <div class="inner"><img src="${URLS[id]}" alt="${esc(label(id))}" draggable="false">${dim}</div>${tag ? `<span class="tag">${esc(tag)}</span>` : ""}</div>`;
+}
+function backHTML(kind, { cls = "", num = null } = {}) {
+  if (kind === "num") return `<div class="card ${cls}" style="cursor:default"><div class="numback">${num ?? "#"}</div></div>`;
+  return `<div class="card ${cls}" style="cursor:default"><div class="inner"><img src="${URLS[kind === "job" ? "BACK-job" : "BACK-event"]}" alt="" draggable="false"></div></div>`;
+}
+function stars(n) { return `<span class="stars">${"★".repeat(n)}<span class="muted">${"☆".repeat(4 - n)}</span></span>`; }
+
+function cardActions(id, { big = false } = {}) {
+  const w = where(id);
+  const btns = [`<button data-a="rotate" data-id="${id}">⟲ Rotate 180°</button>`];
+  const c = CARDS[id];
+  if (c.kind === "event" && c.top && (c.top === state.scenario || c.bottom === state.scenario) && c.top !== c.bottom)
+    btns.push(`<button data-a="whole" data-id="${id}">${state.whole[id] ? "Highlight this scenario's half" : "Show whole card"}</button>`);
+  for (const p of ["p1", "p2"]) if (w !== p) btns.push(`<button class="${p}" data-a="move" data-id="${id}" data-dest="${p}">→ ${esc(name(p))}'s hand</button>`);
+  const rd = returnDest(id);
+  if (w !== rd) btns.push(`<button data-a="move" data-id="${id}" data-dest="${rd}">${returnLabel(id)}</button>`);
+  if (big && c.kind === "event" && w === "eventDiscard") btns.push(`<button data-a="move" data-id="${id}" data-dest="eventTop">Back on top of event deck</button>`);
+  if (w !== "removed") btns.push(`<button class="danger" data-a="move" data-id="${id}" data-dest="removed">Remove from game</button>`);
+  return btns.join("");
+}
+
+// ------------------------------------------------------------------ views
+function renderSetup() {
+  const saved = loadSaved();
+  const s = ui.setup;
+  const scenTiles = DATA.scenarios.map(sc => `
+    <button class="scen${s.scenario === sc.id ? " sel" : ""}" data-a="pickScen" data-id="${sc.id}">
+      <img src="${URLS[`S-${sc.id}-A`]}" alt="">
+      <div class="meta"><strong>${esc(sc.name)}</strong>${stars(sc.stars)}</div>
+    </button>`).join("");
+  const diffs = Object.entries(DIFF).map(([k, d]) => `
+    <button class="diff${s.difficulty === k ? " sel" : ""}" data-a="pickDiff" data-id="${k}">
+      <b>${d.label}</b><span class="muted">Fame goal ${d.fame} · remove ${d.remove} event cards</span>
+    </button>`).join("");
+  let summary = `<span class="muted">Pick a scenario to continue.</span>`;
+  if (s.scenario) {
+    const sc = SCEN[s.scenario], d = DIFF[s.difficulty];
+    const generic = DATA.events.filter(e => !e.top).length;
+    const them = DATA.events.filter(e => e.top === sc.id || e.bottom === sc.id).length;
+    summary = `<div><strong>${esc(sc.name)}</strong> ${stars(sc.stars)} · ${d.label}<br>
+      <span class="muted">Event deck: ${generic} generic − ${d.remove} removed + ${them} themed = <b style="color:var(--text)">${generic - d.remove + them} cards</b> · fame goal ${d.fame} each</span></div>`;
+  }
+  document.getElementById("app").innerHTML = `
+  <div class="setup">
+    <h1>Star Wars: Outer Rim — Uneasy Alliances</h1>
+    <p class="sub">Fan-made co-op expansion by Mike Schoenfeld (v2.2.01). Set up the base game as normal (no Ambitions or Favors), then choose your scenario here.</p>
+    ${saved ? `<div class="summary"><div><strong>Saved game found</strong><br><span class="muted">${esc(SCEN[saved.scenario].name)} · ${DIFF[saved.difficulty].label} · ${saved.eventDeck.length} event cards left</span></div><div class="spacer"></div><button class="primary" data-a="resume">Continue game</button></div>` : ""}
+    <h2>1 · Scenario</h2>
+    <div class="scengrid">${scenTiles}</div>
+    <h2>2 · Difficulty</h2>
+    <div class="diffs">${diffs}</div>
+    <h2>3 · Players</h2>
+    <div class="names">
+      <label><span class="muted">Player 1</span><input type="text" id="n1" value="${esc(s.p1)}"></label>
+      <label><span class="muted">Player 2</span><input type="text" id="n2" value="${esc(s.p2)}"></label>
+    </div>
+    <div class="summary">${summary}<div class="spacer"></div>
+      ${saved ? `<span class="muted">Starting will replace the saved game.</span>` : ""}
+      <button class="primary" data-a="start" ${s.scenario ? "" : "disabled"}>Build decks &amp; start</button>
+    </div>
+  </div>`;
+}
+
+function renderGame() {
+  const s = state, sc = SCEN[s.scenario], d = DIFF[s.difficulty];
+  const circles = s.side === "A" ? sc.circlesA : sc.circlesB;
+  const dots = circles.map((c, i) => `<button class="dot${s.marks[s.side][i] ? " on" : ""}" style="left:${c.x}%;top:${c.y}%;width:${c.w}%" data-a="dot" data-side="${s.side}" data-i="${i}" title="Toggle progress"></button>`).join("");
+  const goalTokens = s.marks.B.slice(0, 2).filter(Boolean).length;
+
+  const sheet = `
+  <section class="panel sheet">
+    <header><h2>Scenario sheet · side ${s.side}</h2><span class="count">${stars(sc.stars)}</span></header>
+    <div class="sheetwrap${ui.sheetFlip ? " flipping" : ""}">
+      <img src="${URLS[`S-${sc.id}-${s.side}`]}" alt="${esc(sc.name)} side ${s.side}" draggable="false">
+      ${dots}
+    </div>
+    <div class="sheetbar">
+      <button class="primary" data-a="flipSheet">⇆ Flip to side ${s.side === "A" ? "B" : "A"}</button>
+      <button data-a="bigSheet">⤢ Enlarge</button>
+      <span class="muted">Click a circle to place or remove a marker.</span>
+      ${s.side === "B" ? `<span class="chip">Goal markers on first two jobs: <b>${goalTokens}</b></span>` : ""}
+    </div>
+    <div class="fame">
+      ${["p1", "p2"].map(p => `
+        <div class="fameboxname ${p}" style="align-self:center">${esc(name(p))}</div>
+        <div class="famebox${s.fame[p] >= d.fame ? " done" : ""}">
+          <span class="muted">Fame</span>
+          <button class="fameboxbtn" data-a="fame" data-p="${p}" data-d="-1">−</button>
+          <span class="n">${s.fame[p]}</span>
+          <button class="fameboxbtn" data-a="fame" data-p="${p}" data-d="1">+</button>
+          <span class="muted">/ ${d.fame}</span>
+        </div>`).join("")}
+    </div>
+  </section>`;
+
+  const topDiscard = s.eventDiscard[s.eventDiscard.length - 1];
+  const event = `
+  <section class="panel event">
+    <header><h2>Co-op event deck</h2><span class="count"><b>${s.eventDeck.length}</b> left</span></header>
+    <div class="decktop">
+      <div class="col">
+        <div class="pile stacked"><span class="badge">${s.eventDeck.length}</span>${s.eventDeck.length ? backHTML("event") : `<div class="emptyslot">Empty</div>`}</div>
+        <div class="pile" style="margin-top:6px">${topDiscard ? `<span class="badge" style="background:#8f99b5">${s.eventDiscard.length}</span>${cardHTML(topDiscard, { zoom: false, cls: "", style: "cursor:pointer" }).replace('class="card', 'data-a="pile" data-pile="eventDiscard" class="card')}` : `<div class="emptyslot" style="font-size:11px">Discard</div>`}</div>
+      </div>
+      <div class="col">
+        <div class="turn">Next to draw: <span class="who ${s.active}">${esc(name(s.active))}</span> <button data-a="swapActive" title="Switch player" style="padding:1px 7px">⇄</button></div>
+        <button class="primary" data-a="draw">Draw event <kbd>D</kbd></button>
+        <button data-a="defeated" title="If your character is defeated, discard the top card instead of drawing it">Defeated: discard top</button>
+        <button data-a="pile" data-pile="eventDiscard">View discard (${s.eventDiscard.length})</button>
+      </div>
+    </div>
+    <div class="current">
+      ${s.eventCurrent ? cardHTML(s.eventCurrent) + `<div class="actions">${cardActions(s.eventCurrent)}</div>` : `<div class="emptyslot">Draw at the end of each player's turn</div>`}
+    </div>
+  </section>`;
+
+  const jobs = `
+  <section class="panel jobs">
+    <header><h2>Co-op job market</h2><span class="count"><b>${s.jobDeck.length}</b> cards</span></header>
+    <div class="current" style="margin-top:0">
+      ${s.jobDeck.length ? `<div class="pile stacked" style="width:min(100%,240px)">${cardHTML(s.jobDeck[0])}</div>` : `<div class="emptyslot">Market empty</div>`}
+      <div class="actions">
+        <button data-a="jobShuffle" ${s.jobDeck.length > 1 ? "" : "disabled"}>🔀 Shuffle</button>
+        <button data-a="jobBottom" ${s.jobDeck.length > 1 ? "" : "disabled"}>Top → bottom</button>
+      </div>
+      <div class="actions">
+        <button class="p1" data-a="jobGain" data-p="p1" ${s.jobDeck.length ? "" : "disabled"}>Gain → ${esc(name("p1"))}</button>
+        <button class="p2" data-a="jobGain" data-p="p2" ${s.jobDeck.length ? "" : "disabled"}>Gain → ${esc(name("p2"))}</button>
+      </div>
+    </div>
+  </section>`;
+
+  const scenNums = new Set(sc.nums);
+  let numBtns = "";
+  for (let n = 101; n <= 148; n++) {
+    const avail = s.numDeck.filter(id => CARDS[id].num === n).length;
+    const total = DUP_NUMS.has(n) ? 2 : 1;
+    numBtns += `<button class="numbtn${scenNums.has(n) ? " scen" : ""}" data-a="reveal" data-n="${n}" ${avail ? "" : "disabled"} title="${avail}/${total} in deck">${n}${total > 1 ? `<span class="dots">${"•".repeat(avail)}</span>` : ""}</button>`;
+  }
+  const num = `
+  <section class="panel num">
+    <header><h2>Numbered deck</h2><span class="count"><b>${s.numDeck.length}</b> cards in deck</span></header>
+    <div class="numlayout">
+      <div>
+        <form class="row" data-form="reveal">
+          <input type="number" id="numq" min="101" max="148" placeholder="Card # (101–148)" style="width:170px">
+          <button class="primary" type="submit">Search &amp; reveal</button>
+        </form>
+        <div class="numgrid">${numBtns}</div>
+        <div class="legend muted">Gold underline = cards for this scenario (its jobs + crew). Dots = versions left in the deck; if there are two, one is picked at random. Grey = not in the deck.</div>
+      </div>
+      <div class="current">
+        ${s.numCurrent ? cardHTML(s.numCurrent, { tag: `#${CARDS[s.numCurrent].num}` }) + `<div class="actions">${cardActions(s.numCurrent)}</div>` : `<div class="emptyslot">Search a number to reveal it</div>`}
+      </div>
+    </div>
+  </section>`;
+
+  const hands = `
+  <section class="hands">
+    ${["p1", "p2"].map(p => `
+      <div class="panel hand ${p}">
+        <h3><span class="who ${p}">${esc(name(p))}</span><span class="muted" style="font-weight:400">· ${s.hands[p].length} card${s.hands[p].length === 1 ? "" : "s"} in hand</span></h3>
+        <div class="handcards">${s.hands[p].length ? s.hands[p].map(id => cardHTML(id, { tag: CARDS[id].kind === "num" ? `#${CARDS[id].num}` : "" })).join("") : `<span class="muted">Secrets, gear, crew and jobs gained from these decks show up here.</span>`}</div>
+      </div>`).join("")}
+  </section>`;
+
+  document.getElementById("app").innerHTML = `
+  <div class="topbar">
+    <h1>Uneasy Alliances</h1>
+    <div class="info">
+      <span class="chip">${esc(sc.name)} ${stars(sc.stars)}</span>
+      <span class="chip">${d.label} · fame goal <b>${d.fame}</b></span>
+      <span class="chip">Event deck <b>${s.eventDeck.length}</b></span>
+    </div>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button data-a="undo" ${history.length ? "" : "disabled"} title="Ctrl/Cmd+Z">↶ Undo</button>
+      <button data-a="pile" data-pile="removed">Removed (${s.removed.length})</button>
+      <button data-a="log">Log</button>
+      <button data-a="newGame">New game</button>
+    </div>
+  </div>
+  <main class="board"><div class="stack">${sheet}${hands}</div><div class="stack"><div class="duo">${event}${jobs}</div>${num}</div></main>`;
+  ui.flip = null;
+  ui.sheetFlip = false;
+}
+
+function renderOverlay() {
+  const el = document.getElementById("overlay");
+  let html = "";
+  const m = ui.modal;
+  if (state && m) {
+    if (m.type === "card" && where(m.id)) {
+      const c = CARDS[m.id];
+      const w = where(m.id);
+      const loc = { eventCurrent: "Current event", numCurrent: "Revealed", p1: `${name("p1")}'s hand`, p2: `${name("p2")}'s hand`, eventDiscard: "Event discard pile", removed: "Removed from game", jobDeck: "Job market", numDeck: "Numbered deck", eventDeck: "Event deck" }[w];
+      html += `<div class="modalback" data-a="close"><div class="modal" data-stop>
+        <header><h2>${c.kind === "num" ? `Card #${c.num}` : c.kind === "job" ? "Co-op job" : "Co-op event"}</h2><span class="muted">${esc(loc)}</span><button class="x" data-a="close">✕</button></header>
+        <div class="bigcard">${cardHTML(m.id, { zoom: false })}<div class="col">${cardActions(m.id, { big: true })}</div></div>
+      </div></div>`;
+    } else if (m.type === "pile") {
+      const ids = m.pile === "eventDiscard" ? state.eventDiscard.slice().reverse() : state.removed.slice().reverse();
+      html += `<div class="modalback" data-a="close"><div class="modal" data-stop>
+        <header><h2>${m.pile === "eventDiscard" ? "Event discard pile" : "Removed from game"}</h2><span class="muted">${ids.length} cards${m.pile === "eventDiscard" ? " · newest first" : ""}</span><button class="x" data-a="close">✕</button></header>
+        <div class="pilegrid">${ids.length ? ids.map(id => cardHTML(id)).join("") : `<span class="muted">Nothing here yet.</span>`}</div>
+      </div></div>`;
+    } else if (m.type === "sheet") {
+      const sc = SCEN[state.scenario];
+      const circles = state.side === "A" ? sc.circlesA : sc.circlesB;
+      html += `<div class="modalback" data-a="close"><div class="modal" data-stop>
+        <header><h2>${esc(sc.name)} · side ${state.side}</h2><button data-a="flipSheet">⇆ Flip</button><button class="x" data-a="close">✕</button></header>
+        <div class="sheetwrap bigsheet"><img src="${URLS[`S-${sc.id}-${state.side}`]}" alt="">
+          ${circles.map((c, i) => `<button class="dot${state.marks[state.side][i] ? " on" : ""}" style="left:${c.x}%;top:${c.y}%;width:${c.w}%" data-a="dot" data-side="${state.side}" data-i="${i}"></button>`).join("")}
+        </div>
+      </div></div>`;
+    } else if (m.type === "log") {
+      html += `<div class="modalback" data-a="close"><div class="modal" data-stop>
+        <header><h2>Game log</h2><button class="x" data-a="close">✕</button></header>
+        <div class="log">${state.log.map(l => `<div><time>${l.t}</time>${esc(l.msg)}</div>`).join("")}</div>
+      </div></div>`;
+    } else if (m.type === "confirmNew") {
+      html += `<div class="modalback" data-a="close"><div class="modal" data-stop style="max-width:440px">
+        <header><h2>Start a new game?</h2></header>
+        <p class="muted" style="margin:0">This goes back to scenario setup. Your current game stays saved until you start a new one.</p>
+        <div class="row" style="justify-content:flex-end"><button data-a="close">Cancel</button><button class="primary" data-a="toSetup">Go to setup</button></div>
+      </div></div>`;
+    }
+  }
+  if (state && state.lost) {
+    html += `<div class="banner lost"><div class="box"><h2>The event deck is empty</h2>
+      <p class="muted">A player couldn't draw from the Co-op Event Deck, so the game is over and both players have lost.</p>
+      <div class="row" style="justify-content:center"><button data-a="undo">↶ Undo last action</button><button data-a="dismissLost">View board</button><button class="primary" data-a="toSetup">New game</button></div></div></div>`;
+  } else if (state && state.won) {
+    html += `<div class="banner won"><div class="box"><h2>Scenario complete!</h2>
+      <p class="muted">The final job is marked on side B. If you finished it before the event deck ran out, you win together.</p>
+      <div class="row" style="justify-content:center"><button data-a="undo">↶ Undo</button><button class="primary" data-a="dismissWon">Back to board</button></div></div></div>`;
+  }
+  if (ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
+  el.innerHTML = html;
+}
+
+function render() {
+  if (state) renderGame(); else renderSetup();
+  renderOverlay();
+}
+
+// ------------------------------------------------------------------ events
+document.addEventListener("click", e => {
+  const zoom = e.target.closest("[data-zoom]");
+  const t = e.target.closest("[data-a]");
+  if (zoom && (!t || zoom.contains(t) === false || t === zoom)) {
+    ui.modal = { type: "card", id: zoom.dataset.zoom };
+    renderOverlay();
+    return;
+  }
+  if (!t) return;
+  if (t.dataset.a === "close" && e.target.closest("[data-stop]") && !e.target.closest('button[data-a="close"]')) return;
+  const a = t.dataset.a, id = t.dataset.id;
+  switch (a) {
+    case "pickScen": ui.setup.scenario = id; syncNames(); render(); break;
+    case "pickDiff": ui.setup.difficulty = id; syncNames(); render(); break;
+    case "start": {
+      syncNames();
+      newGame(ui.setup.scenario, ui.setup.difficulty, { p1: ui.setup.p1.trim() || "Player 1", p2: ui.setup.p2.trim() || "Player 2" });
+      window.scrollTo(0, 0);
+      render();
+      break;
+    }
+    case "resume": state = loadSaved(); history = []; render(); break;
+    case "newGame": ui.modal = { type: "confirmNew" }; renderOverlay(); break;
+    case "toSetup":
+      ui.modal = null;
+      if (state) { ui.setup.scenario = state.scenario; ui.setup.difficulty = state.difficulty; ui.setup.p1 = state.names.p1; ui.setup.p2 = state.names.p2; }
+      state = null; history = []; render(); break;
+    case "close": ui.modal = null; renderOverlay(); break;
+    case "undo": undo(); break;
+    case "draw": A.drawEvent(); break;
+    case "defeated": A.defeatedDiscard(); break;
+    case "swapActive": A.setActive(other(state.active)); break;
+    case "reveal": A.revealNum(t.dataset.n); break;
+    case "jobShuffle": A.jobShuffle(); break;
+    case "jobBottom": A.jobTopToBottom(); break;
+    case "jobGain": A.jobGain(t.dataset.p); break;
+    case "move": A.move(id, t.dataset.dest); break;
+    case "rotate": A.rotate(id); break;
+    case "whole": A.toggleWhole(id); break;
+    case "dot": A.toggleDot(t.dataset.side, Number(t.dataset.i)); break;
+    case "flipSheet": A.flipSheet(); break;
+    case "bigSheet": ui.modal = { type: "sheet" }; renderOverlay(); break;
+    case "fame": A.fame(t.dataset.p, Number(t.dataset.d)); break;
+    case "pile": ui.modal = { type: "pile", pile: t.dataset.pile }; renderOverlay(); break;
+    case "log": ui.modal = { type: "log" }; renderOverlay(); break;
+    case "dismissLost": state.lost = false; save(); render(); break;
+    case "dismissWon": state.won = false; save(); render(); break;
+  }
+});
+document.addEventListener("submit", e => {
+  if (e.target.dataset.form === "reveal") {
+    e.preventDefault();
+    const v = document.getElementById("numq").value;
+    A.revealNum(v);
+    const inp = document.getElementById("numq");
+    if (inp) { inp.focus(); }
+  }
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "n1") ui.setup.p1 = e.target.value;
+  if (e.target.id === "n2") ui.setup.p2 = e.target.value;
+});
+function syncNames() {
+  const n1 = document.getElementById("n1"), n2 = document.getElementById("n2");
+  if (n1) ui.setup.p1 = n1.value;
+  if (n2) ui.setup.p2 = n2.value;
+}
+document.addEventListener("keydown", e => {
+  if (!state) return;
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
+  if (e.target.matches("input")) return;
+  if (e.key === "Escape" && ui.modal) { ui.modal = null; renderOverlay(); return; }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key.toLowerCase() === "d" && !ui.modal) A.drawEvent();
+  if (e.key === "/" || e.key.toLowerCase() === "n") { const i = document.getElementById("numq"); if (i) { e.preventDefault(); i.focus(); } }
+});
+
+state = null;
+render();
+</script>
+</body>
+</html>

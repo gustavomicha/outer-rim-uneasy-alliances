@@ -1,0 +1,195 @@
+{
+  "_note": "Text of the 8 co-op scenario sheets (Uneasy Alliances v2.2.01), used to draw them in the Ambition-sheet style. Row 'slots' is either a number of progress circles or \"AB\" (one per player). Circle order (row by row, left to right, fame row last) matches the progress circles detected on the PDF, so saved games keep their marks.",
+  "jabba": {
+    "tags": "Hutt Reputation · Illegal Cargo",
+    "A": {
+      "intro": "Jabba the Hutt is looking to expand the influence of his cartel into new markets, making a name for himself across the galaxy. He is looking for a worthy crew that can help him destroy some competition and share in his profits. This would guarantee a place in Jabba’s organization and set you up for life!",
+      "rows": [
+        { "icon": "inf", "title": "Prove your loyalty to the Hutts", "text": "Have positive Hutt reputation.", "who": "Each Player", "slots": "AB" },
+        { "icon": "dash", "title": "Make a name for yourselves as smugglers", "text": "Deliver a combined total of 4 illegal cargo.", "who": "Either Player", "slots": 4 },
+        { "icon": "1", "title": "Gain Jabba’s attention", "text": "Encounter the Tatooine space.", "who": "Each Player", "slots": "AB" },
+        { "icon": "2", "title": "Scope out the competition", "text": "Encounter the Ord Mantell space.", "who": "Each Player", "slots": "AB" }
+      ]
+    },
+    "B": {
+      "intro": "Jabba says to make your move! You will need to work together to strike a blow against the competition, procure some desirable cargo and set up a network in the Black Market.",
+      "jobs": [
+        { "title": "Disrupt Kessel smuggling operations", "skills": "Knowledge, Strength, Ground Combat", "dest": "Kessel (One Player)", "card": 101 },
+        { "title": "Disrupt Syndicate smuggling operations", "skills": "Stealth, Tech, Ship Combat", "dest": "The Syndicate Patrol (One Player)", "card": 102 }
+      ],
+      "markers": ["Mon Calamari", "Nal Hutta", "Tatooine"],
+      "final": [
+        { "title": "Commandeer a Pyke Cargo Convoy", "skills": "All Skills, Ship Combat", "dest": "Cooperative Objective Marker (Both Players)", "card": 103 },
+        { "title": "Carve out a place for Jabba on the Ring of Kafrene", "skills": "All Skills, Ground Combat", "dest": "The Ring of Kafrene (Both Players)", "card": 104 }
+      ]
+    }
+  },
+  "valarian": {
+    "tags": "Crew · Bounties",
+    "A": {
+      "intro": "Valarian, the Whiphid leader of a growing cartel on Tatooine, has a score to settle with Jabba the Hutt. To put an end to the constant struggle for dominance of the planet, Valarian has set her sights on disrupting his operations by convincing many of those loyal to Jabba to see things her way.",
+      "rows": [
+        { "icon": "inf", "title": "Assemble a crew large enough for the job", "text": "Have a combined total of 4 crew members.", "who": "Either Player", "slots": 4 },
+        { "icon": "dash", "title": "Remove some competition", "text": "Collect a reward from five bounties.", "who": "Either Player", "slots": 5 },
+        { "icon": "1", "title": "Stir up dissension among the Hutt council", "text": "Encounter the Nal Hutta space.", "who": "Each Player", "slots": "AB" },
+        { "icon": "2", "title": "Enlist the support of Jabba’s off-world rivals", "text": "Encounter the Kessel space.", "who": "Each Player", "slots": "AB" }
+      ]
+    },
+    "B": {
+      "intro": "Valarian’s message says that it’s go time! You need to create supply train issues for Jabba’s enterprise, create a false summons for Jabba to appear before the Hutt Council and then go for the heart of his empire by hitting Jabba’s Palace itself. Once Jabba’s Palace is yours, no one can stand in your way!",
+      "jobs": [
+        { "title": "Create supply train issues for Jabba’s Enterprise", "skills": "Influence, Tactics, Ground Combat", "dest": "Cantonica (One Player)", "card": 105 },
+        { "title": "Create supply train issues for Jabba’s Enterprise", "skills": "Piloting, Stealth, Ship Combat", "dest": "The Hutt Patrol (One Player)", "card": 106 }
+      ],
+      "markers": ["The Trailing Core", "Takodana", "The Ring of Kafrene"],
+      "final": [
+        { "title": "Lure Jabba off Tatooine with a false summons from the Hutt council", "skills": "All Skills, Ship Combat", "dest": "Cooperative Objective Marker (Both Players)", "card": 107 },
+        { "title": "Hit Jabba’s Palace while he is away", "skills": "All Skills, Ship Combat", "dest": "Tatooine (Both Players)", "card": 108 }
+      ]
+    }
+  },
+  "ryloth": {
+    "tags": "Imperial Reputation · Crew (2 Skills)",
+    "A": {
+      "intro": "Governor Wilhuff Tarkin has been tasked with putting down the Rebel uprising on Ryloth. Twi’lek freedom fighters are being supported and supplied from a mysterious benefactor. The crew that gets rid of them could retire comfortably on the reward.",
+      "rows": [
+        { "icon": "inf", "title": "Prove your loyalty to the Empire", "text": "Have positive Imperial reputation.", "who": "Each Player", "slots": "AB" },
+        { "icon": "dash", "title": "Plant an informant on Ryloth", "text": "Eliminate a crew (remove from game) that has two skills on Ryloth.", "who": "Either Player", "slots": 1 },
+        { "icon": "1", "title": "Demonstrate your usefulness to the Empire", "text": "Encounter the Lothal space.", "who": "Each Player", "slots": "AB" },
+        { "icon": "2", "title": "Work as a double agent on Mon Calamari to gain the trust of the Rebels", "text": "Encounter the Mon Calamari space.", "who": "Each Player", "slots": "AB" }
+      ]
+    },
+    "B": {
+      "intro": "Tarkin contacts your crew with a lead about the source of the Rebel support. You’ll need to follow up on the lead and then follow the trail as far as it goes to eliminate the Rebel cell supporting the uprising on Ryloth.",
+      "jobs": [
+        { "title": "Follow up on a lead about the source of Rebel support", "skills": "Stealth, Tech, Ground Combat", "dest": "The Trailing Core (One Player)", "card": 111 },
+        { "title": "Follow up on a lead about the source of Rebel support", "skills": "Piloting, Influence, Ship Combat", "dest": "The Rebel Patrol (One Player)", "card": 112 }
+      ],
+      "markers": ["Mon Calamari", "Nal Hutta", "Ryloth"],
+      "final": [
+        { "title": "Intercept Rebel supplies", "skills": "All Skills, Ship Combat", "dest": "Cooperative Objective Marker (Both Players)", "card": 113 },
+        { "title": "Destroy the cell supplying the Rebels", "skills": "All Skills, Ground Combat", "dest": "Takodana (Both Players)", "card": 114 }
+      ]
+    }
+  },
+  "lothal": {
+    "tags": "Crew · Bounties",
+    "A": {
+      "intro": "Agent Ulrich Trask of the ISB has received reports of a Rebel incursion on Lothal. He is assembling a team to infiltrate Governor Tarkin’s ranks to root out the Rebel sympathizers without Tarkin knowing, intending to receive the glory for himself. The team that assists will be greatly rewarded.",
+      "rows": [
+        { "icon": "inf", "title": "Assemble a crew large enough for the job", "text": "Have a combined total of 4 crew members.", "who": "Either Player", "slots": 4 },
+        { "icon": "dash", "title": "Gain notoriety as a Bounty Hunter", "text": "Collect a reward from a bounty for two contracts with Strength 5 or higher.", "who": "Either Player", "slots": 2 },
+        { "icon": "1", "title": "Demonstrate your usefulness to the ISB", "text": "Encounter the Naboo space.", "who": "Each Player", "slots": "AB" },
+        { "icon": "2", "title": "Establish a reputation with the criminal underworld", "text": "Encounter the Ring of Kafrene space.", "who": "Each Player", "slots": "AB" }
+      ]
+    },
+    "B": {
+      "intro": "Agent Trask is ready to move on Lothal. He needs your team to obtain Imperial communication records to identify the Rebel Cell. Once identified, you’ll need to create a distraction to lure Tarkin off of Lothal before uncovering and eliminating the cell.",
+      "jobs": [
+        { "title": "Obtain Imperial communication records from an ISB Office", "skills": "Strength, Ground Combat, Knowledge", "dest": "The Spinward Core (One Player)", "card": 115 },
+        { "title": "Obtain Imperial communication records from a reconnaissance ship", "skills": "Stealth, Ship Combat, Tech", "dest": "The Imperial Patrol (One Player)", "card": 116 }
+      ],
+      "markers": ["Kessel", "Tatooine", "Cantonica"],
+      "final": [
+        { "title": "Create a distraction to lure Tarkin off world", "skills": "All Skills, Ground Combat", "dest": "Cooperative Objective Marker (Both Players)", "card": 117 },
+        { "title": "Uncover the Rebel Cell before Tarkin returns", "skills": "All Skills, Ship Combat", "dest": "Lothal (Both Players)", "card": 118 }
+      ]
+    }
+  },
+  "hope": {
+    "tags": "Rebel Reputation · Crew (Knowledge/Tactics)",
+    "A": {
+      "intro": "Mon Mothma, the unofficial leader of the Rebellion, is working on outfitting a Corellian Corvette with a new technology that would be capable of causing damage to an important shipyard in the core. Mon Mothma is looking for a team that can help develop and deploy the ship.",
+      "rows": [
+        { "icon": "inf", "title": "Prove your loyalty to the Rebellion", "text": "Have positive Rebel reputation.", "who": "Each Player", "slots": "AB" },
+        { "icon": "dash", "title": "Deliver an engineer to the project site on Mon Calamari", "dest": "Mon Calamari", "text": "Eliminate one of your crew (remove from game) that has Knowledge and/or Tactics.", "who": "Either Player", "slots": 1 },
+        { "icon": "1", "title": "Assist the Rebel cause at Ryloth", "text": "Encounter the Ryloth space.", "who": "Each Player", "slots": "AB" },
+        { "icon": "2", "title": "Scope out the black market on the Ring of Kafrene", "text": "Encounter the Ring of Kafrene space.", "who": "Each Player", "slots": "AB" }
+      ]
+    },
+    "B": {
+      "intro": "Mon Mothma makes contact to inform you that the ship needs a delivery of Chromium before it is complete, and then the ship will need an escort and someone to create a distraction at the Imperial shipyard.",
+      "jobs": [
+        { "title": "Procure a shipment of Chromium", "skills": "Knowledge, Influence, Ground Combat", "dest": "Ord Mantell (One Player)", "card": 121 },
+        { "title": "Procure a shipment of Chromium", "skills": "Stealth, Piloting, Ship Combat", "dest": "The Hutt Patrol (One Player)", "card": 122 }
+      ],
+      "markers": ["Nal Hutta", "Ryloth", "The Ring of Kafrene"],
+      "final": [
+        { "title": "Protect the Shining Hope", "skills": "All Skills, Ship Combat", "dest": "Cooperative Objective Marker (Both Players)", "card": 123 },
+        { "title": "Sabotage the Imperial Shipyard defense network", "skills": "All Skills, Ground Combat", "dest": "The Trailing Core (Both Players)", "card": 124 }
+      ]
+    }
+  },
+  "naboo": {
+    "tags": "Combined Worth · Ground/Ship Combats",
+    "A": {
+      "intro": "Arane Oreida, the Zabrak leader of a partisan Rebel extremist group, wants the Rebel Alliance’s modified flagship, the Shining Hope, for herself, and plans to use it to do some real damage to the Empire.",
+      "rows": [
+        { "icon": "inf", "title": "Outfit yourself properly", "text": "Have a combined worth (both players’ ships, gear and mods) of at least 60,000 credits.", "who": "Either Player", "slots": 1 },
+        { "icon": "dash", "title": "Gain the attention of the Partisans", "text": "Win a combined total of six combats.", "who": "Either Player", "slots": 6 },
+        { "icon": "1", "title": "Make contact with a Partisan recruiter", "text": "Encounter the Takodana space.", "who": "Each Player", "slots": "AB" },
+        { "icon": "2", "title": "Run reconnaissance of the project site on Mon Calamari", "text": "Encounter the Mon Calamari space.", "who": "Each Player", "slots": "AB" }
+      ]
+    },
+    "B": {
+      "intro": "Arane informs you that the Rebellion’s special project is complete and ready for the taking! You’ll need to create a distraction, steal the modified Corellian Corvette, and then escort it to Naboo where the Partisan crew can decimate the capital city of Theed.",
+      "jobs": [
+        { "title": "Plant false intel to draw the Shining Hope out", "skills": "Ground Combat, Tactics, Stealth", "dest": "Ryloth (One Player)", "card": 125 },
+        { "title": "Plant false intel to draw the Shining Hope out", "skills": "Ship Combat, Piloting, Tech", "dest": "The Rebel Patrol (One Player)", "card": 126 }
+      ],
+      "markers": ["The Spinward Core", "Tatooine", "Nal Hutta"],
+      "final": [
+        { "title": "Steal the Shining Hope", "skills": "All Skills, Ground Combat", "dest": "Cooperative Objective Marker (Both Players)", "card": 127 },
+        { "title": "Unleash the Shining Hope against Naboo", "skills": "All Skills, Ship Combat", "dest": "Naboo (Both Players)", "card": 128 }
+      ]
+    }
+  },
+  "sunrise": {
+    "tags": "Crew · Ground/Ship Combats",
+    "A": {
+      "intro": "Dryden Vos is looking for a team to further disrupt the war-torn planet of Ryloth to allow Crimson Dawn to assert control. He is looking for the right group of agitators for the job, and will reward success and ambition with a place of power and wealth in his organization.",
+      "rows": [
+        { "icon": "inf", "title": "Recruit a large enough crew", "text": "Have a combined total of 4 crew members.", "who": "Either Player", "slots": 4 },
+        { "icon": "dash", "title": "Establish yourselves as capable agitators", "text": "Win a combined total of 6 combats.", "who": "Either Player", "slots": 6 },
+        { "icon": "1", "title": "Create connections in the Syndicate", "text": "Encounter the Ord Mantell space.", "who": "Each Player", "slots": "AB" },
+        { "icon": "2", "title": "Make contact with the Hutts", "text": "Encounter the Tatooine space.", "who": "Each Player", "slots": "AB" }
+      ]
+    },
+    "B": {
+      "intro": "It is time to isolate Ryloth by cutting off Rebel support, then by redirecting Rebel reinforcements away from the planet. Then, seize the opportunity to establish Crimson Dawn as the new rulers of Ryloth.",
+      "jobs": [
+        { "title": "Cut off Rebel support to Ryloth from Mon Calamari", "skills": "Influence, Stealth, Ground Combat", "dest": "Mon Calamari (One Player)", "card": 131 },
+        { "title": "Cut off Rebel support to Ryloth from the Rebel Fleet", "skills": "Piloting, Tactics, Ship Combat", "dest": "The Rebel Patrol (One Player)", "card": 132 }
+      ],
+      "markers": ["Ord Mantell", "The Trailing Core", "Takodana"],
+      "final": [
+        { "title": "Redirect Rebel reinforcements away from Ryloth", "skills": "All Skills, Ship Combat", "dest": "Cooperative Objective Marker (Both Players)", "card": 133 },
+        { "title": "Assert the power of Crimson Dawn on Ryloth", "skills": "All Skills, Ground Combat", "dest": "Ryloth (Both Players)", "card": 134 }
+      ]
+    }
+  },
+  "crimson": {
+    "tags": "Crew (Stealth/Influence) · Jobs",
+    "A": {
+      "intro": "A mysterious woman called Q enlists your help in implicating Dryden Vos in collusion with the Hutt Council, an offense that won’t be overlooked by his superiors. She needs a crew that can be effective and discreet to work for her so she can keep her hands clean.",
+      "rows": [
+        { "icon": "dash", "title": "Get an inside man on Dryden’s ship, the First Light", "text": "Eliminate a crew (remove from game) that has either Stealth or Influence on Ord Mantell.", "who": "Either Player", "slots": 1 },
+        { "icon": "dash", "title": "Prove your resourcefulness", "text": "Complete a combined total of 6 jobs.", "who": "Either Player", "slots": 6 },
+        { "icon": "1", "title": "Gain the trust of the Syndicate", "text": "Encounter the Kessel space.", "who": "Each Player", "slots": "AB" },
+        { "icon": "2", "title": "Gather intel on the Hutt Council", "text": "Encounter the Nal Hutta space.", "who": "Each Player", "slots": "AB" }
+      ]
+    },
+    "B": {
+      "intro": "Q lets you know that things are in place to turn Dryden Vos’ life upside down. All you need to do is make some Crimson Dawn shipments disappear, steal a valuable piece of cargo from the Hutts and plant evidence that Vos is working with the Hutts so he will take the fall.",
+      "jobs": [
+        { "title": "Create a disruption in Crimson Dawn’s supply train", "skills": "Stealth, Tactics, Ground Combat", "dest": "Takodana (One Player)", "card": 135 },
+        { "title": "Create a disruption in Crimson Dawn’s supply train", "skills": "Piloting, Tech, Ship Combat", "dest": "The Syndicate Patrol (One Player)", "card": 136 }
+      ],
+      "markers": ["The Trailing Core", "Nal Hutta", "Mon Calamari"],
+      "final": [
+        { "title": "Steal a stash of Beskar from the Hutts", "skills": "All Skills, Ground Combat", "dest": "Cooperative Objective Marker (Both Players)", "card": 137 },
+        { "title": "Plant the evidence on the First Light", "skills": "All Skills, Ship Combat", "dest": "Cantonica (Both Players)", "card": 138 }
+      ]
+    }
+  }
+}

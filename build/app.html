@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uneasy Alliances</title>
+<style>
+/*__FONTS__*/
+
+/* Look & feel taken from the Outer Rim rulebooks: brushed-metal page frame, Teuton-style condensed
+   headings (Saira Condensed stands in), Source Sans body text, #2b6e8f blue accents, pill headings,
+   blue callout boxes and hexagonal number plates. */
+:root {
+  --ink: #231f20;
+  --muted: #5d6870;
+  --blue: #2b6e8f;
+  --blue-dark: #1f5673;
+  --blue-soft: #d3e2ec;
+  --blue-softer: #e6eef4;
+  --paper: #eceef0;
+  --steel: #59646d;
+  --red: #c0392b;
+  --gold: #f2c14e;
+  /* player colors are set from the chosen player boards (see applyPlayerColors) */
+  --p1: #34499e; --p1-soft: #d9ddef; --p1-text: #34499e; --p1-on: #fff;
+  --p2: #b3263a; --p2-soft: #f1d8dc; --p2-text: #b3263a; --p2-on: #fff;
+  --ok: #3b8a4a;
+  --head: "Saira Condensed", "Arial Narrow", sans-serif;
+  --body: "Source Sans 3", "Source Sans Pro", system-ui, sans-serif;
+  --logo: "Montserrat", "Avenir Next", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: #c9cfd5 url("__FRAME__") center / 100% 100% no-repeat fixed;
+  color: var(--ink);
+  font: 400 15px/1.4 var(--body);
+  overflow: hidden;
+}
+/* the scrollable "page" sits inside the metal frame of the background image */
+.page {
+  position: fixed; top: 3.4vh; bottom: 4.6vh; left: 2.7vw; right: 2.7vw;
+  overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--blue) transparent;
+}
+.page::-webkit-scrollbar { width: 9px; }
+.page::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 9px; }
+
+h1, h2, h3 { margin: 0; font-family: var(--head); font-weight: 700; }
+.muted { color: var(--muted); }
+.stars { color: var(--blue-dark); letter-spacing: 1px; font-size: 15px; }
+.stars .off { color: #9aa6ae; }
+
+button {
+  font: 600 15px/1.2 var(--head); letter-spacing: .3px; color: var(--blue); background: rgba(255,255,255,.72);
+  border: 2px solid var(--blue); border-radius: 999px; padding: 4px 14px; cursor: pointer; white-space: nowrap;
+  transition: background .12s, color .12s, box-shadow .12s;
+}
+button:hover:not(:disabled) { background: #fff; box-shadow: 0 1px 6px rgba(43,110,143,.35); }
+button:disabled { opacity: .45; cursor: default; }
+button.primary { background: var(--blue); color: #fff; }
+button.primary:hover:not(:disabled) { background: var(--blue-dark); }
+button.danger { color: var(--red); border-color: var(--red); }
+button.p1 { color: var(--p1-text); border-color: var(--p1); background: color-mix(in srgb, var(--p1-soft) 55%, #fff); }
+button.p2 { color: var(--p2-text); border-color: var(--p2); background: color-mix(in srgb, var(--p2-soft) 55%, #fff); }
+button.p1:hover:not(:disabled) { background: var(--p1); color: var(--p1-on); }
+button.p2:hover:not(:disabled) { background: var(--p2); color: var(--p2-on); }
+input[type=text], input[type=number] {
+  font: 400 15px var(--body); color: var(--ink); background: #fff; border: 2px solid var(--blue);
+  border-radius: 999px; padding: 4px 14px; outline: none;
+}
+input:focus { box-shadow: 0 0 0 3px rgba(43,110,143,.25); }
+kbd {
+  font: 700 11px var(--head); padding: 0 5px; border-radius: 4px; border: 1px solid rgba(255,255,255,.6);
+  background: rgba(255,255,255,.18);
+}
+
+/* ---------- rulebook headings ---------- */
+.title-outline {
+  display: inline-block; font: 700 22px/1.1 var(--head); color: var(--blue); text-transform: uppercase; letter-spacing: .6px;
+  border: 2.5px solid var(--blue); border-radius: 999px; padding: 3px 26px 2px; background: rgba(255,255,255,.55);
+}
+.title-fill {
+  display: inline-block; font: 600 18px/1.1 var(--head); color: #fff; background: var(--blue); border-radius: 999px; padding: 4px 24px;
+}
+.title-dots {
+  font: 600 16px/1.2 var(--head); color: var(--blue); padding-bottom: 3px;
+  background: radial-gradient(circle, var(--blue) 1.1px, transparent 1.4px) 0 100% / 6px 4px repeat-x;
+}
+
+/* hexagonal number plate (like the rulebook page numbers) */
+.hex { display: inline-block; background: #3d464e; padding: 2px; flex: none;
+  clip-path: polygon(11px 0, calc(100% - 11px) 0, 100% 50%, calc(100% - 11px) 100%, 11px 100%, 0 50%); }
+.hex > span {
+  display: flex; align-items: center; justify-content: center; min-width: 44px; height: 24px; padding: 0 14px;
+  font: 700 16px var(--head); color: var(--ink); background: linear-gradient(#fdfdfd, #c6ccd1);
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
+}
+
+/* ---------- top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  padding: 10px 22px 10px; background: linear-gradient(rgba(236,238,240,.97), rgba(236,238,240,.9));
+  border-bottom: 2px solid var(--blue);
+}
+.logo { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.logo .sw { font: 800 11px var(--logo); letter-spacing: 3.5px; color: var(--ink); font-style: italic; }
+.logo .or { font: 300 25px var(--logo); letter-spacing: 4px; color: #3b4148; margin-top: 1px; }
+.logo .ua { font: 500 9.5px var(--logo); letter-spacing: 3.2px; color: var(--blue); margin-top: 2px; }
+.topbar .info { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.topbar .scen-name { font: 700 20px var(--head); color: var(--blue); text-transform: uppercase; letter-spacing: .5px; }
+.topbar .meta { display: flex; align-items: center; gap: 8px; font: 600 15px var(--head); color: var(--ink); }
+.topbar .spacer { flex: 1; }
+.topbar .actions { display: flex; gap: 6px; }
+
+/* ---------- board ---------- */
+.board {
+  display: grid; gap: 22px 20px; padding: 22px 22px 34px;
+  grid-template-columns: minmax(440px, 1.25fr) minmax(560px, 1.2fr); align-items: start;
+}
+.stack { display: flex; flex-direction: column; gap: 26px; min-width: 0; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+
+/* blue callout box: tabbed top rail, blue title bar, pale blue body, thin bottom rail */
+.panel { position: relative; background: var(--blue-soft); padding: 0 0 14px; margin-top: 8px; margin-bottom: 6px; }
+.panel::before, .panel::after { content: ""; position: absolute; left: 0; right: 0; background: var(--blue); }
+.panel::before {
+  top: -8px; height: 9px;
+  clip-path: polygon(0 100%, 10px 0, 18% 0, calc(18% + 8px) 55%, calc(82% - 8px) 55%, 82% 0, calc(100% - 10px) 0, 100% 100%);
+}
+.panel::after {
+  bottom: -6px; height: 7px;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, calc(82% + 6px) 100%, 82% 40%, 18% 40%, calc(18% - 6px) 100%, 8px 100%);
+}
+.panel > header {
+  display: flex; align-items: center; gap: 10px; background: var(--blue); color: #fff; padding: 5px 12px 6px; margin-bottom: 12px;
+}
+.panel > header h2 { font: 600 19px/1.1 var(--head); letter-spacing: .3px; flex: 1; }
+.panel > header .hex { margin-left: auto; }
+.panel > :not(header) { margin-left: 14px; margin-right: 14px; }
+.panel.p1 { --blue: var(--p1); --blue-soft: var(--p1-soft); }
+.panel.p2 { --blue: var(--p2); --blue-soft: var(--p2-soft); }
+.panel.p1 > header { color: var(--p1-on); }
+.panel.p2 > header { color: var(--p2-on); }
+.panel.p1 .card .tag { color: var(--p1-on); }
+.panel.p1 label { color: var(--p1-text); }
+.panel.p2 label { color: var(--p2-text); }
+.panel.p2 .card .tag { color: var(--p2-on); }
+.row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 7px; }
+
+/* ---------- cards ---------- */
+.card {
+  position: relative; aspect-ratio: 3 / 4; border-radius: 7px; overflow: hidden; background: #fff;
+  box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 3px 10px rgba(20,30,40,.35); cursor: zoom-in; flex: none;
+}
+.card .inner { position: absolute; inset: 0; transition: transform .45s ease; }
+.card.rot .inner { transform: rotate(180deg); }
+.card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card .dim { position: absolute; left: 0; right: 0; height: 50%; background: rgba(35, 45, 55, .55); pointer-events: none; }
+.card .dim.top { top: 0; } .card .dim.bottom { bottom: 0; }
+.card .tag {
+  position: absolute; top: 5px; left: 5px; background: var(--blue); color: #fff; font: 600 12px var(--head);
+  padding: 1px 8px; border-radius: 99px; pointer-events: none;
+}
+.pile { position: relative; }
+.pile .badge { position: absolute; right: -10px; top: -9px; z-index: 2; }
+.pile .badge > span { min-width: 38px; height: 22px; font-size: 14px; padding: 0 11px; }
+.pile.stacked .card { box-shadow: 2px 2px 0 #d8dde1, 4px 4px 0 #b4bcc3, 6px 6px 0 #8f99a2, 0 8px 16px rgba(20,30,40,.4); }
+.emptyslot {
+  aspect-ratio: 3 / 4; border: 2px dashed rgba(43,110,143,.5); border-radius: 8px; display: flex; align-items: center;
+  justify-content: center; color: var(--blue); text-align: center; padding: 12px; font: 600 15px var(--head);
+  background: rgba(255,255,255,.35);
+}
+@keyframes flipIn { from { transform: rotateY(90deg) scale(.96); } to { transform: rotateY(0) scale(1); } }
+.flipping { animation: flipIn .38s ease-out; }
+
+/* ---------- scenario sheet ---------- */
+.sheetwrap {
+  position: relative; aspect-ratio: 612 / 395; border-radius: 6px; overflow: hidden;
+  box-shadow: 0 0 0 3px #8e979f, 0 0 0 5px #4a545c, 0 6px 16px rgba(20,30,40,.4);
+}
+.sheetwrap img { width: 100%; height: 100%; display: block; }
+.dot { position: absolute; aspect-ratio: 1; border-radius: 50%; border: 0; padding: 0; background: transparent; cursor: pointer; }
+.dot:hover { box-shadow: 0 0 0 3px rgba(43,110,143,.9); background: rgba(255,255,255,.25); }
+.dot.on {
+  background: radial-gradient(circle at 35% 30%, #ffe9a8, #f2c14e 45%, #9c6f12 100%);
+  box-shadow: 0 0 0 2px #3b2a05, 0 2px 6px rgba(0,0,0,.5);
+}
+.dot.on::after {
+  content: "✓"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #3b2a05; font-weight: 900; font-size: clamp(10px, 1.3vw, 20px);
+}
+.sheetbar { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+.fame { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; margin-top: 14px; }
+.famename { font: 700 17px var(--head); }
+.famename.p1 { color: var(--p1-text); } .famename.p2 { color: var(--p2-text); }
+.famebox { display: flex; align-items: center; gap: 8px; }
+.famebox button { padding: 0 11px; font-size: 18px; line-height: 1.15; }
+.famebox .goal { font: 600 15px var(--head); color: var(--muted); }
+.famebox.done .hex > span { background: linear-gradient(#f7fff5, #a9d9a6); }
+.famebox.done .goal { color: var(--ok); }
+
+/* ---------- scenario sheet drawn like an Unfinished Business ambition sheet ---------- */
+.ambwrap { container-type: inline-size; }
+.amb {
+  position: relative; padding: 2.4cqw 3.2cqw 2.6cqw; border-radius: 1.2cqw;
+  background:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 .25cqw, rgba(0,0,0,.035) .25cqw .6cqw),
+    linear-gradient(160deg, #dfe2e5 0%, #a3a9af 34%, #c9cdd1 55%, #8c9399 80%, #b7bcc1 100%);
+  box-shadow: inset 0 0 0 .25cqw rgba(255,255,255,.55), inset 0 0 0 .55cqw rgba(60,66,72,.35), 0 .8cqw 2cqw rgba(20,30,40,.4);
+  font-family: var(--body); color: #26292c;
+}
+.amb::before, .amb::after {
+  content: ""; position: absolute; top: 22%; bottom: 16%; width: 1.3cqw; border-radius: .4cqw;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 5cqw, rgba(170,205,240,.55) 5cqw 5.5cqw, transparent 5.5cqw 9cqw),
+    linear-gradient(90deg, #17304d, #2d5580 50%, #17304d);
+  box-shadow: inset 0 0 0 .15cqw rgba(0,0,0,.4);
+}
+.amb::before { left: .95cqw; } .amb::after { right: .95cqw; }
+.amb-head { background: #121314; color: #fff; text-align: center; padding: .7cqw 2cqw .8cqw; box-shadow: 0 0 0 .3cqw #e9ecee; }
+.amb-head h3 { font: 700 3.9cqw/1.05 var(--head); letter-spacing: .05cqw; }
+.amb-sub { background: #eef0f2; color: #3a3f44; text-align: center; font: italic 400 1.8cqw/1.4 var(--body); padding: .25cqw 1cqw .35cqw; }
+.amb-sub .hs-inline { display: inline-block; width: 2.9cqw; height: 1.8cqw; vertical-align: -0.3cqw; background: #26292c; -webkit-mask: var(--hs) center / contain no-repeat; mask: var(--hs) center / contain no-repeat; }
+.amb-sub .stars { font-size: 1.9cqw; color: #26292c; font-style: normal; }
+.amb-tags {
+  margin: .9cqw -.6cqw 0; padding: .45cqw 1cqw; text-align: center; text-transform: uppercase; letter-spacing: .12cqw;
+  font: italic 600 1.75cqw/1.2 var(--head); color: #4a5056; background: linear-gradient(#e4e7ea, #b3b9be); box-shadow: inset 0 -.2cqw 0 rgba(0,0,0,.2);
+}
+.amb-body {
+  margin-top: .9cqw; border: .3cqw solid #2c3035; overflow: hidden;
+  background:
+    radial-gradient(circle at 46% 58%, transparent 0 17cqw, rgba(80,110,150,.10) 17.2cqw 17.7cqw, transparent 17.9cqw 25cqw, rgba(80,110,150,.08) 25.2cqw 25.7cqw, transparent 25.9cqw),
+    linear-gradient(180deg, #f5f7f9, #dbe1e7);
+}
+.amb-intro { padding: 1.6cqw 4cqw 1.7cqw; text-align: center; font: italic 300 2.1cqw/1.38 var(--body); }
+.amb-row { display: grid; grid-template-columns: 11cqw 1fr 21cqw; border-top: .3cqw solid #2c3035; min-height: 11.5cqw; }
+.amb-icon {
+  margin: 1cqw 0 1cqw 1cqw; background: #141516; color: #fff; display: flex; align-items: center; justify-content: center;
+  font: 700 5.4cqw/1 var(--head);
+}
+.amb-icon svg { width: 5.6cqw; height: 5.6cqw; fill: #fff; }
+.amb-icon .hs { width: 7.6cqw; height: 4.8cqw; background: #fff; -webkit-mask: var(--hs) center / contain no-repeat; mask: var(--hs) center / contain no-repeat; }
+.amb-text { padding: 1.1cqw 1.6cqw; text-align: center; display: flex; flex-direction: column; justify-content: center; font: 400 2.05cqw/1.35 var(--body); }
+.amb-text i { font-weight: 300; }
+.amb-text b { font-weight: 700; }
+.amb-text .who { color: #5b6268; white-space: nowrap; }
+.amb-text .skills { font: italic 600 1.75cqw/1.3 var(--head); letter-spacing: .08cqw; text-transform: uppercase; color: #4a5056; }
+.amb-text a { color: var(--blue); font-weight: 700; text-decoration: underline dotted; cursor: pointer; }
+.amb-slots {
+  display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: .9cqw; padding: 1cqw 1.2cqw;
+  background: linear-gradient(90deg, rgba(40,45,50,0), rgba(40,45,50,.13)); border-left: .2cqw solid rgba(44,48,53,.25);
+}
+.amb-slots.many { display: grid; grid-template-columns: repeat(3, 5.6cqw); gap: .7cqw; }
+.amb-row.reward { grid-template-columns: 1fr; min-height: 0; }
+.amb-row.reward .amb-text { padding: 1.2cqw 4cqw; }
+.markers { display: flex; justify-content: center; gap: 1.2cqw; flex-wrap: wrap; margin-top: .8cqw; }
+.markers span { padding: .25cqw 1.4cqw; border-radius: 99px; border: .2cqw solid #8b949b; background: rgba(255,255,255,.6); font-size: 1.9cqw; }
+.markers span.cur { border-color: var(--blue); background: var(--blue); color: #fff; font-weight: 600; }
+.amb .slot {
+  --s: 8.6cqw; --well: #202326; width: var(--s); height: var(--s); border-radius: 50%; border: 0; padding: 0; position: relative; flex: none;
+  background: radial-gradient(circle, var(--well) 0 50%, #0b0c0d 55%, #f4f6f8 59%, #a2a9b0 66%, #eceff2 72%, #5d646b 80%, #2a2e32 84%, transparent 86%);
+  font: 700 calc(var(--s) * .36) var(--head); color: #fff; box-shadow: none;
+}
+.amb-slots.many .slot { --s: 5.6cqw; }
+.amb .slot::before { content: ""; position: absolute; inset: 20%; border-radius: 50%; background: radial-gradient(circle at 50% 30%, rgba(255,255,255,.16), transparent 60%); }
+.amb .slot span { position: relative; }
+.amb .slot.p1, .amb .slot.p2 { color: #fff; }
+.amb .slot.p1 { box-shadow: 0 0 0 .4cqw var(--p1); }
+.amb .slot.p2 { box-shadow: 0 0 0 .4cqw var(--p2); }
+.amb .slot:hover:not(:disabled) { --well: #3b5a78; color: #fff; }
+.amb .slot.on::after {
+  content: "✓"; position: absolute; inset: 17%; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 35% 30%, #ffe9a8, #f2c14e 45%, #9c6f12 100%); color: #3b2a05; font-size: calc(var(--s) * .34);
+  box-shadow: 0 .2cqw .6cqw rgba(0,0,0,.6);
+}
+.amb .slot.on span { display: none; }
+.bigamb { width: min(86vw, 1150px); }
+
+/* ---------- decks ---------- */
+.decktop { display: grid; grid-template-columns: 92px 1fr; gap: 14px; align-items: start; }
+.current { margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.current .card, .current .emptyslot, .current .pile { width: min(100%, 236px); }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.turn { display: flex; align-items: center; gap: 6px; font: 600 15px var(--head); color: var(--muted); }
+.who { font-weight: 700; }
+.who.p1 { color: var(--p1-text); } .who.p2 { color: var(--p2-text); }
+.turn button { padding: 0 8px; }
+
+/* ---------- numbered deck (databank-style card backs) ---------- */
+.numlayout { display: grid; grid-template-columns: 1fr 236px; gap: 18px; align-items: start; }
+.numgrid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-top: 12px; }
+.numbtn {
+  height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; position: relative;
+  font: 700 19px var(--head); letter-spacing: .5px; color: #1c1c1c; background: #fbfaf6; border: 1px solid #aeb6bd;
+  border-radius: 5px; box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+.numbtn:hover:not(:disabled) { border-color: var(--blue); background: #fff; box-shadow: 0 0 0 2px rgba(43,110,143,.4); }
+.numbtn.mine { box-shadow: inset 0 -4px 0 var(--blue), 0 1px 2px rgba(0,0,0,.2); }
+.numbtn .dots { position: absolute; left: 0; right: 0; bottom: 3px; font-size: 9px; line-height: 1; letter-spacing: 1px; }
+.numbtn:disabled { background: #b9c1c7; color: #7c868d; border-color: #9aa3aa; opacity: 1; box-shadow: none; }
+.legend { font-size: 13px; margin-top: 10px; color: var(--muted); }
+.num .current { margin-top: 0; }
+
+/* ---------- hands ---------- */
+.handcards { display: flex; flex-wrap: wrap; gap: 12px; min-height: 64px; }
+.handcards .card { width: 118px; }
+
+/* ---------- modal ---------- */
+.modalback {
+  position: fixed; inset: 0; background: rgba(22, 32, 42, .62); z-index: 50; display: flex;
+  align-items: center; justify-content: center; padding: 34px; backdrop-filter: blur(2px);
+}
+.modal { max-width: 94vw; max-height: 90vh; overflow: auto; background: var(--paper); box-shadow: 0 16px 50px rgba(0,0,0,.5); padding-bottom: 16px; }
+.modal.panel::before, .modal.panel::after { display: none; }
+.modal > header { position: sticky; top: 0; z-index: 2; }
+.modal > header .x { margin-left: 8px; color: #fff; border-color: rgba(255,255,255,.8); background: transparent; padding: 0 10px; }
+.modal > header .x:hover { background: rgba(255,255,255,.15); }
+.modal > header .sub { font: 600 15px var(--head); opacity: .85; }
+.bigcard { display: flex; gap: 20px; align-items: flex-start; }
+.bigcard .card { height: min(74vh, 700px); width: auto; cursor: default; }
+.bigcard .col { min-width: 210px; }
+.bigcard .col button { text-align: left; }
+.pilegrid { display: grid; grid-template-columns: repeat(auto-fill, 130px); gap: 14px; width: min(88vw, 1000px); }
+.bigsheet { width: min(88vw, 1400px); }
+.log { width: min(640px, 86vw); font-size: 14px; }
+.log div { padding: 5px 0; border-bottom: 1px dotted rgba(43,110,143,.4); }
+.log time { color: var(--blue); font: 600 14px var(--head); margin-right: 10px; }
+.modal header .title-outline { font-size: 18px; }
+
+.banner { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: rgba(22,32,42,.7); }
+.banner .box { text-align: center; background: var(--paper); border: 3px solid var(--blue); border-radius: 14px; padding: 28px 40px; max-width: 540px; box-shadow: 0 16px 50px rgba(0,0,0,.5); }
+.banner .title-outline { font-size: 26px; margin-bottom: 12px; }
+.banner.lost .title-outline { color: var(--red); border-color: var(--red); }
+.banner p { font-size: 16px; }
+
+.toast {
+  position: fixed; bottom: 7vh; left: 50%; transform: translateX(-50%); background: var(--blue); color: #fff;
+  padding: 6px 20px; border-radius: 999px; z-index: 70; font: 600 16px var(--head); box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+
+/* ---------- setup ---------- */
+.setup { max-width: 1180px; margin: 0 auto; padding: 26px 26px 50px; }
+.biglogo { display: flex; flex-direction: column; align-items: center; line-height: 1; margin: 6px 0 8px; }
+.biglogo .sw { font: 800 26px var(--logo); font-style: italic; letter-spacing: 8px; color: var(--ink); }
+.biglogo .rule { width: 340px; max-width: 70%; height: 2px; background: #3b4148; margin: 8px 0 6px; }
+.biglogo .or { font: 300 64px var(--logo); letter-spacing: 10px; color: #353b42; }
+.biglogo .ua { font: 500 22px var(--logo); letter-spacing: 9px; color: var(--blue); margin-top: 10px; }
+.biglogo .exp { font: 500 13px var(--logo); letter-spacing: 6px; color: #3b4148; margin-top: 6px; }
+.setup .intro { text-align: center; font-style: italic; color: var(--muted); margin: 12px auto 4px; max-width: 760px; }
+.setup .step { margin: 30px 0 14px; }
+.scengrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 20px; }
+.scen {
+  font: inherit; color: var(--ink); text-align: left; padding: 0; overflow: hidden; border-radius: 8px; white-space: normal;
+  display: flex; flex-direction: column; border: 0;
+  background: linear-gradient(180deg, #f5f7f9, #dbe1e7);
+  box-shadow: 0 0 0 3px #9aa1a7, 0 0 0 5px #5b636a, 0 4px 12px rgba(20,30,40,.3);
+}
+.scen:hover:not(:disabled) { background: linear-gradient(180deg, #fff, #e6ebf0); box-shadow: 0 0 0 3px var(--blue), 0 0 0 5px #5b636a, 0 4px 14px rgba(20,30,40,.35); }
+.scen .scen-title { background: #121314; color: #fff; text-align: center; font: 700 19px/1.1 var(--head); padding: 8px 10px 9px; }
+.scen .scen-tags {
+  text-align: center; text-transform: uppercase; letter-spacing: 1px; font: italic 600 12px/1.2 var(--head); color: #4a5056;
+  background: linear-gradient(#e4e7ea, #b3b9be); padding: 4px 8px;
+}
+.scen p { margin: 0; padding: 10px 14px 8px; font: italic 300 14px/1.4 var(--body); text-align: center; flex: 1; }
+.scen .scen-foot {
+  display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border-top: 2px solid #2c3035;
+  font: 600 14px var(--head); color: #3a3f44;
+}
+.scen .scen-foot .stars { font-size: 17px; color: #26292c; }
+.scen.sel { box-shadow: 0 0 0 4px var(--blue), 0 0 20px rgba(43,110,143,.65); }
+.scen.sel .scen-title { background: var(--blue); }
+.diffs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.diff {
+  font: inherit; color: var(--ink); text-align: center; padding: 12px 14px; white-space: normal; background: rgba(255,255,255,.6);
+  border: 2.5px solid var(--blue); border-radius: 14px;
+}
+.diff b { display: block; font: 700 22px var(--head); color: var(--blue); text-transform: uppercase; letter-spacing: .6px; }
+.diff.sel { background: var(--blue); color: #fff; }
+.diff.sel b { color: #fff; }
+.names { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.names .panel { margin-top: 8px; }
+.names label { display: flex; flex-direction: column; gap: 5px; font: 600 15px var(--head); color: var(--blue); }
+.names input[type=text] { width: 100%; border-color: var(--blue); }
+.swatches { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-top: 12px; }
+.swatch {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: 0; background: none;
+  font: 600 14px var(--head); color: var(--ink); border-radius: 8px;
+}
+.swatch:hover:not(:disabled) { background: none; box-shadow: none; }
+.swatch i {
+  display: block; width: 58px; height: 36px; border-radius: 7px; background: var(--c);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.25), 0 2px 5px rgba(0,0,0,.25);
+}
+.swatch.sel i { box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--c), 0 2px 8px rgba(0,0,0,.35); }
+.swatch:disabled { opacity: .35; }
+.swatch input[type=color] { width: 58px; height: 36px; padding: 0; border: 2px dashed #7d878f; border-radius: 7px; background: none; cursor: pointer; }
+.swatch.sel input[type=color] { border: 3px solid var(--ink); }
+.summary { margin-top: 30px; }
+.summary .inner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.summary .spacer { flex: 1; }
+.summary strong { font: 700 19px var(--head); }
+.summary button.primary { font-size: 18px; padding: 6px 22px; }
+
+@media (max-width: 1100px) { .board { grid-template-columns: 1fr; } }
+@media (max-width: 720px) {
+  .page { top: 2vh; bottom: 2vh; left: 3vw; right: 3vw; }
+  .board { padding: 12px; }
+  .duo, .numlayout { grid-template-columns: 1fr; }
+  .bigcard { flex-direction: column; }
+  .bigcard .card { height: auto; width: 100%; }
+  .diffs, .names { grid-template-columns: 1fr; }
+  .biglogo .or { font-size: 40px; }
+}
+</style>
+</head>
+<body>
+<div class="page" id="page"><div id="app"></div></div>
+<div id="overlay"></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const IMAGES = /*__IMAGES__*/null;
+
+// ------------------------------------------------------------------ images -> blob URLs
+const URLS = {};
+for (const [k, v] of Object.entries(IMAGES)) {
+  const b64 = v.slice(v.indexOf(",") + 1);
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  URLS[k] = URL.createObjectURL(new Blob([bytes], { type: "image/webp" }));
+}
+
+// ------------------------------------------------------------------ static data
+const CARDS = {};
+for (const c of [...DATA.events, ...DATA.numbered, ...DATA.jobs]) CARDS[c.id] = c;
+const SCEN = Object.fromEntries(DATA.scenarios.map(s => [s.id, s]));
+const DIFF = {
+  easy: { label: "Easy", fame: 6, remove: 10 },
+  medium: { label: "Medium", fame: 8, remove: 6 },
+  hard: { label: "Hard", fame: 10, remove: 2 },
+};
+const DUP_NUMS = new Set(DATA.numbered.filter((c, i, a) => a.findIndex(x => x.num === c.num) !== i).map(c => c.num));
+const SAVE_KEY = "uneasy-alliances-save-v1";
+// Outer Rim player boards: blue, red and yellow are confirmed from rulebook/product photos; green is assumed.
+const BOARDS = [
+  { id: "blue", label: "Blue", color: "#34499e" },
+  { id: "red", label: "Red", color: "#b3263a" },
+  { id: "yellow", label: "Yellow", color: "#d4a51c" },
+  { id: "green", label: "Green", color: "#2f8a4e" },
+];
+const DEFAULT_COLORS = { p1: BOARDS[0].color, p2: BOARDS[1].color };
+
+function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function rgbToHex(r, g, b) { return "#" + [r, g, b].map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join(""); }
+function luminance(h) {
+  const [r, g, b] = hexToRgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+// derive the tints a player color needs: pale panel background, readable text on paper, and text on a solid fill
+function playerPalette(color) {
+  const rgb = hexToRgb(color);
+  const soft = rgbToHex(...rgb.map(v => v + (255 - v) * 0.78));
+  let text = rgb, k = 1;
+  while (luminance(rgbToHex(...text)) > 0.16 && k > 0.2) { k -= 0.08; text = rgb.map(v => v * k); }
+  const on = luminance(color) > 0.36 ? "#231f20" : "#ffffff";
+  return { base: color, soft, text: rgbToHex(...text), on };
+}
+function applyPlayerColors(colors) {
+  const root = document.documentElement.style;
+  for (const p of ["p1", "p2"]) {
+    const pal = playerPalette(colors[p]);
+    root.setProperty(`--${p}`, pal.base);
+    root.setProperty(`--${p}-soft`, pal.soft);
+    root.setProperty(`--${p}-text`, pal.text);
+    root.setProperty(`--${p}-on`, pal.on);
+  }
+}
+
+// ------------------------------------------------------------------ state
+let state = null;
+let history = [];
+const ui = { modal: null, flip: null, sheetFlip: false, toast: null, setup: { scenario: null, difficulty: "medium", p1: "Player 1", p2: "Player 2", colors: { ...DEFAULT_COLORS } } };
+
+function save() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function loadSaved() {
+  try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.v === 1 ? s : null; } catch (e) { return null; }
+}
+function clearSaved() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+}
+
+function rand(n) {
+  const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n;
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const name = p => state.names[p];
+const other = p => (p === "p1" ? "p2" : "p1");
+
+function log(msg) {
+  const t = new Date();
+  state.log.unshift({ t: t.toTimeString().slice(0, 5), msg });
+  if (state.log.length > 300) state.log.length = 300;
+}
+
+// every state change goes through here: snapshot for undo, mutate, save, render
+function act(fn) {
+  const snap = JSON.stringify(state);
+  const result = fn();
+  if (result === false) return;
+  history.push(snap);
+  if (history.length > 150) history.shift();
+  save();
+  render();
+}
+function undo() {
+  if (!history.length) return;
+  state = JSON.parse(history.pop());
+  ui.modal = null;
+  save();
+  toast("Undone");
+  render();
+}
+
+function toast(msg) {
+  ui.toast = msg;
+  renderOverlay();
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => { ui.toast = null; renderOverlay(); }, 2200);
+}
+
+// ------------------------------------------------------------------ game setup
+function newGame(scenario, difficulty, names, colors) {
+  const d = DIFF[difficulty];
+  const generic = shuffle(DATA.events.filter(e => !e.top).map(e => e.id));
+  const setupRemoved = generic.splice(0, d.remove);
+  const thematic = DATA.events.filter(e => e.top === scenario || e.bottom === scenario).map(e => e.id);
+  const sc = SCEN[scenario];
+  state = {
+    v: 1, scenario, difficulty, names, colors,
+    side: "A",
+    marks: { A: sc.circlesA.map(() => false), B: sc.circlesB.map(() => false) },
+    fame: { p1: 0, p2: 0 },
+    active: "p1",
+    eventDeck: shuffle([...generic, ...thematic]),
+    eventCurrent: null,
+    eventDiscard: [],
+    setupRemoved,
+    numDeck: DATA.numbered.map(c => c.id),
+    numCurrent: null,
+    jobDeck: shuffle(DATA.jobs.map(c => c.id)),
+    hands: { p1: [], p2: [] },
+    removed: [],
+    rot: {},
+    whole: {},
+    log: [],
+    lost: false,
+    won: false,
+    wonSeen: false,
+  };
+  log(`New game: ${sc.name} (${d.label}). Event deck ${state.eventDeck.length} cards (${thematic.length} themed, ${d.remove} generic removed).`);
+  history = [];
+  save();
+}
+
+// ------------------------------------------------------------------ card movement
+function label(id) {
+  const c = CARDS[id];
+  if (c.kind === "num") return `#${c.num}`;
+  if (c.kind === "job") return "co-op job";
+  return "event card";
+}
+
+function detach(id) {
+  const s = state;
+  if (s.eventCurrent === id) s.eventCurrent = null;
+  if (s.numCurrent === id) s.numCurrent = null;
+  for (const key of ["eventDeck", "eventDiscard", "numDeck", "jobDeck", "removed"]) {
+    const i = s[key].indexOf(id); if (i >= 0) s[key].splice(i, 1);
+  }
+  for (const p of ["p1", "p2"]) { const i = s.hands[p].indexOf(id); if (i >= 0) s.hands[p].splice(i, 1); }
+}
+
+function where(id) {
+  const s = state;
+  if (s.eventCurrent === id) return "eventCurrent";
+  if (s.numCurrent === id) return "numCurrent";
+  if (s.hands.p1.includes(id)) return "p1";
+  if (s.hands.p2.includes(id)) return "p2";
+  for (const key of ["eventDiscard", "removed", "jobDeck", "numDeck", "eventDeck"]) if (s[key].includes(id)) return key;
+  return null;
+}
+
+function moveTo(id, dest) {
+  detach(id);
+  if (dest !== "p1" && dest !== "p2") delete state.rot[id];
+  switch (dest) {
+    case "p1": case "p2": state.hands[dest].push(id); log(`${name(dest)} takes ${label(id)}`); break;
+    case "discard": state.eventDiscard.push(id); log(`Discarded ${label(id)}`); break;
+    case "numDeck": state.numDeck.push(id); log(`Returned ${label(id)} to the numbered deck`); break;
+    case "jobBottom": state.jobDeck.push(id); log(`Put ${label(id)} on the bottom of the job market`); break;
+    case "removed": state.removed.push(id); log(`Removed ${label(id)} from the game`); break;
+    case "eventTop": state.eventDeck.unshift(id); log(`Put ${label(id)} back on top of the event deck`); break;
+  }
+}
+
+function returnDest(id) {
+  const k = CARDS[id].kind;
+  return k === "event" ? "discard" : k === "num" ? "numDeck" : "jobBottom";
+}
+function returnLabel(id) {
+  const k = CARDS[id].kind;
+  return k === "event" ? "Discard" : k === "num" ? "Return to numbered deck" : "Bottom of job market";
+}
+
+// ------------------------------------------------------------------ actions
+const A = {
+  drawEvent() {
+    act(() => {
+      const p = state.active;
+      if (!state.eventDeck.length) { state.lost = true; log(`${name(p)} could not draw: the event deck is empty. Game lost.`); return; }
+      if (state.eventCurrent) moveTo(state.eventCurrent, "discard");
+      state.eventCurrent = state.eventDeck.shift();
+      ui.flip = state.eventCurrent;
+      log(`${name(p)} draws an event (${state.eventDeck.length} left)`);
+      state.active = other(p);
+    });
+  },
+  defeatedDiscard() {
+    act(() => {
+      const p = state.active;
+      if (!state.eventDeck.length) { state.lost = true; log(`Event deck empty. Game lost.`); return; }
+      if (state.eventCurrent) moveTo(state.eventCurrent, "discard");
+      state.eventDiscard.push(state.eventDeck.shift());
+      log(`${name(p)} was defeated: top event card discarded unseen (${state.eventDeck.length} left)`);
+      state.active = other(p);
+    });
+  },
+  setActive(p) { act(() => { state.active = p; }); },
+  revealNum(n) {
+    n = Number(n);
+    if (!(n >= 101 && n <= 148)) { toast("Enter a card number from 101 to 148"); return; }
+    const copies = state.numDeck.filter(id => CARDS[id].num === n);
+    if (!copies.length) {
+      const out = DATA.numbered.filter(c => c.num === n).map(c => where(c.id));
+      toast(`#${n} is not in the deck (${out.map(w => w === "p1" || w === "p2" ? `in ${name(w)}'s hand` : w === "numCurrent" ? "revealed" : "removed from game").join(", ")})`);
+      return;
+    }
+    act(() => {
+      if (state.numCurrent) moveTo(state.numCurrent, "numDeck");
+      const id = copies[rand(copies.length)];
+      detach(id);
+      state.numCurrent = id;
+      ui.flip = id;
+      log(`Revealed card #${n}${copies.length > 1 ? " (random version)" : ""}`);
+    });
+  },
+  jobShuffle() { act(() => { state.jobDeck = shuffle(state.jobDeck); log("Shuffled the job market"); }); toast("Job market shuffled"); },
+  jobTopToBottom() {
+    if (state.jobDeck.length < 2) return;
+    act(() => { state.jobDeck.push(state.jobDeck.shift()); log("Moved the top job to the bottom"); });
+  },
+  jobGain(p) {
+    if (!state.jobDeck.length) return;
+    act(() => { moveTo(state.jobDeck[0], p); });
+  },
+  move(id, dest) { act(() => { moveTo(id, dest); if (ui.modal && ui.modal.type === "card") ui.modal = null; }); },
+  rotate(id) { act(() => { state.rot[id] = !state.rot[id]; }); },
+  toggleWhole(id) { state.whole[id] = !state.whole[id]; save(); render(); },
+  toggleDot(side, i) {
+    act(() => {
+      state.marks[side][i] = !state.marks[side][i];
+      if (side === "B" && state.marks.B.length && state.marks.B[state.marks.B.length - 1] && !state.wonSeen) { state.won = true; state.wonSeen = true; }
+      log(`${state.marks[side][i] ? "Marked" : "Unmarked"} progress circle ${i + 1} on side ${side}`);
+    });
+  },
+  flipSheet() { act(() => { state.side = state.side === "A" ? "B" : "A"; ui.sheetFlip = true; log(`Flipped the scenario sheet to side ${state.side}`); }); },
+  fame(p, d) { act(() => { state.fame[p] = Math.max(0, state.fame[p] + d); log(`${name(p)} fame ${state.fame[p]}`); }); },
+};
+
+// ------------------------------------------------------------------ render helpers
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function cardHTML(id, { cls = "", style = "", zoom = true, tag = "" } = {}) {
+  const c = CARDS[id];
+  let dim = "";
+  if (c.kind === "event" && c.top && !state.whole[id]) {
+    if (c.top === state.scenario && c.bottom !== state.scenario) dim = `<div class="dim bottom"></div>`;
+    else if (c.bottom === state.scenario && c.top !== state.scenario) dim = `<div class="dim top"></div>`;
+  }
+  const flip = ui.flip === id ? " flipping" : "";
+  return `<div class="card${state.rot[id] ? " rot" : ""}${flip} ${cls}" style="${style}" ${zoom ? `data-zoom="${id}"` : ""}>
+    <div class="inner"><img src="${URLS[id]}" alt="${esc(label(id))}" draggable="false">${dim}</div>${tag ? `<span class="tag">${esc(tag)}</span>` : ""}</div>`;
+}
+function backHTML(kind, { cls = "", num = null } = {}) {
+  if (kind === "num") return `<div class="card ${cls}" style="cursor:default"><div class="numback">${num ?? "#"}</div></div>`;
+  return `<div class="card ${cls}" style="cursor:default"><div class="inner"><img src="${URLS[kind === "job" ? "BACK-job" : "BACK-event"]}" alt="" draggable="false"></div></div>`;
+}
+function stars(n) { return `<span class="stars">${"★".repeat(n)}<span class="off">${"☆".repeat(4 - n)}</span></span>`; }
+
+function cardActions(id, { big = false } = {}) {
+  const w = where(id);
+  const btns = [`<button data-a="rotate" data-id="${id}">⟲ Rotate 180°</button>`];
+  const c = CARDS[id];
+  if (c.kind === "event" && c.top && (c.top === state.scenario || c.bottom === state.scenario) && c.top !== c.bottom)
+    btns.push(`<button data-a="whole" data-id="${id}">${state.whole[id] ? "Highlight this scenario's half" : "Show whole card"}</button>`);
+  for (const p of ["p1", "p2"]) if (w !== p) btns.push(`<button class="${p}" data-a="move" data-id="${id}" data-dest="${p}">→ ${esc(name(p))}'s hand</button>`);
+  const rd = returnDest(id);
+  if (w !== rd) btns.push(`<button data-a="move" data-id="${id}" data-dest="${rd}">${returnLabel(id)}</button>`);
+  if (big && c.kind === "event" && w === "eventDiscard") btns.push(`<button data-a="move" data-id="${id}" data-dest="eventTop">Back on top of event deck</button>`);
+  if (w !== "removed") btns.push(`<button class="danger" data-a="move" data-id="${id}" data-dest="removed">Remove from game</button>`);
+  return btns.join("");
+}
+
+
+// ------------------------------------------------------------------ views
+const hex = v => `<span class="hex"><span>${v}</span></span>`;
+const logo = `<div class="logo"><span class="sw">STAR WARS</span><span class="or">OUTER RIM</span><span class="ua">UNEASY ALLIANCES</span></div>`;
+
+const FAME_ICON = `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 2 C55 36 64 45 98 50 C64 55 55 64 50 98 C45 64 36 55 2 50 C36 45 45 36 50 2 Z"/></svg>`;
+
+// one side of a scenario sheet, in the style of an Unfinished Business ambition sheet
+function sheetHTML(sc, side) {
+  const sh = sc.sheet, marks = state.marks[side] || [], d = DIFF[state.difficulty];
+  let idx = 0;
+  const slot = (label, p) => {
+    const i = idx++;
+    const who = p ? ` — ${esc(name(p))}` : "";
+    return `<button class="slot${marks[i] ? " on" : ""}${p ? " " + p : ""}" data-a="dot" data-side="${side}" data-i="${i}" title="Toggle progress${who}">${label ? `<span>${label}</span>` : ""}</button>`;
+  };
+  const slots = n => {
+    if (n === "AB") return { cls: "", html: slot("A", "p1") + slot("B", "p2") };
+    let html = ""; for (let k = 0; k < n; k++) html += slot("");
+    return { cls: n > 2 ? "many" : "", html };
+  };
+  const icon = k => ({ inf: "∞", dash: "–", fame: FAME_ICON, hand: `<i class="hs"></i>` }[k] ?? k);
+  const row = (ic, body, sl) => `<div class="amb-row"><div class="amb-icon">${icon(ic)}</div><div class="amb-text">${body}</div><div class="amb-slots ${sl.cls}">${sl.html}</div></div>`;
+  const card = n => `<a data-a="reveal" data-n="${n}" title="Reveal card #${n}">#${n}</a>`;
+  const job = j => `<i>${esc(j.title)}</i><span class="skills">${esc(j.skills)}</span><span><b>Destination:</b> ${esc(j.dest)}</span><span><b>Encounter:</b> Resolve card ${card(j.card)}</span>`;
+
+  let rows = "";
+  if (side === "A") {
+    for (const r of sh.A.rows) {
+      rows += row(r.icon, `<i>${esc(r.title)}.</i>${r.dest ? `<span><b>Destination:</b> ${esc(r.dest)}</span>` : ""}<span>${esc(r.text)} <span class="who">(${r.who})</span></span>`, slots(r.slots));
+    }
+    rows += row("fame", `<i>Gain the necessary notoriety and experience.</i><span>Reach the fame goal of ${d.fame}. <span class="who">(Each Player)</span></span><span><b>Reward:</b> Flip this sheet over.</span>`, slots("AB"));
+  } else {
+    const placed = marks.slice(0, 2).filter(Boolean).length;
+    sh.B.jobs.forEach(j => { rows += row("hand", job(j), slots(1)); });
+    rows += `<div class="amb-row reward"><div class="amb-text"><span><b>Reward:</b> After both players have attempted their jobs, place the Cooperative Objective Marker on the location matching the number of goal markers on this sheet:</span>
+      <div class="markers">${sh.B.markers.map((m, k) => `<span class="${k === placed ? "cur" : ""}">${k} marker${k === 1 ? "" : "s"} = ${esc(m)}</span>`).join("")}</div></div></div>`;
+    sh.B.final.forEach((j, k) => { rows += row(String(k + 1), job(j), slots(1)); });
+  }
+  const sub = side === "A"
+    ? `<i>Difficulty</i> ${stars(sc.stars)} · <i>side A — complete every goal, then flip</i>`
+    : `<i>Side B</i> · <i>jobs marked</i> <span class="hs-inline"></span> <i>are attempted by both players on consecutive turns</i>`;
+  return `<div class="ambwrap"><div class="amb" style="--hs:url('${DATA.icons.handshake}')">
+    <div class="amb-head"><h3>${esc(sc.name)}</h3></div>
+    <div class="amb-sub">${sub}</div>
+    <div class="amb-tags">${esc(sh.tags)}</div>
+    <div class="amb-body"><div class="amb-intro">${esc(sh[side].intro)}</div>${rows}</div>
+  </div></div>`;
+}
+
+function renderSetup() {
+  const saved = loadSaved();
+  const s = ui.setup;
+  const scenTiles = DATA.scenarios.map(sc => `
+    <button class="scen${s.scenario === sc.id ? " sel" : ""}" data-a="pickScen" data-id="${sc.id}">
+      <div class="scen-title">${esc(sc.name)}</div>
+      <div class="scen-tags">${esc(sc.sheet.tags)}</div>
+      <p>${esc(sc.sheet.A.intro)}</p>
+      <div class="scen-foot"><span>Difficulty</span>${stars(sc.stars)}</div>
+    </button>`).join("");
+  const diffs = Object.entries(DIFF).map(([k, d]) => `
+    <button class="diff${s.difficulty === k ? " sel" : ""}" data-a="pickDiff" data-id="${k}">
+      <b>${d.label}</b>Fame goal ${d.fame} · remove ${d.remove} event cards
+    </button>`).join("");
+  let summary = `<span class="muted">Pick a scenario to continue.</span>`;
+  if (s.scenario) {
+    const sc = SCEN[s.scenario], d = DIFF[s.difficulty];
+    const generic = DATA.events.filter(e => !e.top).length;
+    const them = DATA.events.filter(e => e.top === sc.id || e.bottom === sc.id).length;
+    summary = `<div><strong>${esc(sc.name)}</strong> ${stars(sc.stars)} · ${d.label}<br>
+      <span class="muted">Event deck: ${generic} generic − ${d.remove} removed + ${them} themed = <b style="color:var(--ink)">${generic - d.remove + them} cards</b> · fame goal ${d.fame} each</span></div>`;
+  }
+  document.getElementById("app").innerHTML = `
+  <div class="setup">
+    <div class="biglogo">
+      <span class="sw">STAR WARS</span><span class="rule"></span><span class="or">OUTER RIM</span>
+      <span class="ua">UNEASY ALLIANCES</span><span class="exp">CO-OP EXPANSION</span>
+    </div>
+    <p class="intro">A fan-made cooperative expansion by Mike Schoenfeld (v2.2.01). Set up the base game as normal (no Ambitions or Favors), then choose your scenario here.</p>
+    ${saved ? `<section class="panel summary"><header><h2>Saved Game</h2></header><div class="inner"><div><strong>${esc(SCEN[saved.scenario].name)}</strong><br><span class="muted">${DIFF[saved.difficulty].label} · ${saved.eventDeck.length} event cards left</span></div><div class="spacer"></div><button class="primary" data-a="resume">Continue game</button></div></section>` : ""}
+    <div class="step"><h2 class="title-outline">1 · Scenario</h2></div>
+    <div class="scengrid">${scenTiles}</div>
+    <div class="step"><h2 class="title-outline">2 · Difficulty</h2></div>
+    <div class="diffs">${diffs}</div>
+    <div class="step"><h2 class="title-outline">3 · Players &amp; Boards</h2></div>
+    <div class="names">${["p1", "p2"].map((p, i) => {
+      const mine = s.colors[p], theirs = s.colors[other(p)];
+      const presets = BOARDS.map(b => `<button class="swatch${mine === b.color ? " sel" : ""}" style="--c:${b.color}" data-a="pickColor" data-p="${p}" data-color="${b.color}" ${theirs === b.color ? "disabled title=\"Taken by the other player\"" : ""}><i></i>${b.label}</button>`).join("");
+      const custom = !BOARDS.some(b => b.color === mine);
+      return `<section class="panel ${p}"><header><h2>Player ${i + 1}</h2></header><div>
+        <label>Name<input type="text" id="n${i + 1}" value="${esc(s[p])}"></label>
+        <div class="swatches">${presets}<label class="swatch${custom ? " sel" : ""}" title="Pick any color"><input type="color" data-color-for="${p}" value="${mine}">Custom</label></div>
+      </div></section>`;
+    }).join("")}</div>
+    <section class="panel summary"><header><h2>Ready to Play</h2></header><div class="inner">${summary}<div class="spacer"></div>
+      ${saved ? `<span class="muted">Starting replaces the saved game.</span>` : ""}
+      <button class="primary" data-a="start" ${s.scenario ? "" : "disabled"}>Build decks &amp; start</button>
+    </div></section>
+  </div>`;
+}
+
+function renderGame() {
+  const s = state, sc = SCEN[s.scenario], d = DIFF[s.difficulty];
+
+  const sheet = `
+  <section class="panel sheet">
+    <header><h2>Scenario Sheet · Side ${s.side}</h2><span class="stars" style="color:#fff">${"★".repeat(sc.stars)}<span style="opacity:.45">${"☆".repeat(4 - sc.stars)}</span></span></header>
+    <div class="${ui.sheetFlip ? "flipping" : ""}">${sheetHTML(sc, s.side)}</div>
+    <div class="sheetbar">
+      <button class="primary" data-a="flipSheet">⇆ Flip to side ${s.side === "A" ? "B" : "A"}</button>
+      <button data-a="bigSheet">⤢ Enlarge</button>
+      <span class="muted">Click a slot to place or remove a goal token. Card numbers open the numbered deck.</span>
+    </div>
+    <div class="fame">
+      ${["p1", "p2"].map(p => `
+        <div class="famename ${p}">${esc(name(p))}</div>
+        <div class="famebox${s.fame[p] >= d.fame ? " done" : ""}">
+          <button data-a="fame" data-p="${p}" data-d="-1" title="Lose fame">−</button>
+          ${hex(s.fame[p])}
+          <button data-a="fame" data-p="${p}" data-d="1" title="Gain fame">+</button>
+          <span class="goal">Fame · goal ${d.fame}${s.fame[p] >= d.fame ? " ✓" : ""}</span>
+        </div>`).join("")}
+    </div>
+  </section>`;
+
+  const topDiscard = s.eventDiscard[s.eventDiscard.length - 1];
+  const event = `
+  <section class="panel event">
+    <header><h2>Co-op Event Deck</h2>${hex(s.eventDeck.length)}</header>
+    <div class="decktop">
+      <div class="col" style="gap:14px">
+        <div class="pile stacked">${s.eventDeck.length ? backHTML("event") : `<div class="emptyslot">Empty</div>`}</div>
+        <div class="pile">${topDiscard ? `<span class="badge">${hex(s.eventDiscard.length)}</span>${cardHTML(topDiscard, { zoom: false, style: "cursor:pointer" }).replace('class="card', 'data-a="pile" data-pile="eventDiscard" class="card')}` : `<div class="emptyslot" style="font-size:13px">Discard</div>`}</div>
+      </div>
+      <div class="col">
+        <div class="turn">Next to draw: <span class="who ${s.active}">${esc(name(s.active))}</span><button data-a="swapActive" title="Switch player">⇄</button></div>
+        <button class="primary" data-a="draw">Draw event <kbd>D</kbd></button>
+        <button data-a="defeated" title="If your character is defeated, discard the top card instead of drawing it">Defeated: discard top</button>
+        <button data-a="pile" data-pile="eventDiscard">View discard (${s.eventDiscard.length})</button>
+      </div>
+    </div>
+    <div class="current">
+      ${s.eventCurrent ? cardHTML(s.eventCurrent) + `<div class="actions">${cardActions(s.eventCurrent)}</div>` : `<div class="emptyslot">Draw at the end of each player's turn</div>`}
+    </div>
+  </section>`;
+
+  const jobs = `
+  <section class="panel jobs">
+    <header><h2>Co-op Job Market</h2>${hex(s.jobDeck.length)}</header>
+    <div class="current" style="margin-top:0">
+      ${s.jobDeck.length ? `<div class="pile stacked">${cardHTML(s.jobDeck[0])}</div>` : `<div class="emptyslot">Market empty</div>`}
+      <div class="actions">
+        <button data-a="jobShuffle" ${s.jobDeck.length > 1 ? "" : "disabled"}>Shuffle</button>
+        <button data-a="jobBottom" ${s.jobDeck.length > 1 ? "" : "disabled"}>Top → bottom</button>
+      </div>
+      <div class="actions">
+        <button class="p1" data-a="jobGain" data-p="p1" ${s.jobDeck.length ? "" : "disabled"}>Gain → ${esc(name("p1"))}</button>
+        <button class="p2" data-a="jobGain" data-p="p2" ${s.jobDeck.length ? "" : "disabled"}>Gain → ${esc(name("p2"))}</button>
+      </div>
+    </div>
+  </section>`;
+
+  const scenNums = new Set(sc.nums);
+  let numBtns = "";
+  for (let n = 101; n <= 148; n++) {
+    const avail = s.numDeck.filter(id => CARDS[id].num === n).length;
+    const total = DUP_NUMS.has(n) ? 2 : 1;
+    numBtns += `<button class="numbtn${scenNums.has(n) ? " mine" : ""}" data-a="reveal" data-n="${n}" ${avail ? "" : "disabled"} title="${avail}/${total} in deck">${n}${total > 1 ? `<span class="dots">${"•".repeat(avail)}</span>` : ""}</button>`;
+  }
+  const num = `
+  <section class="panel num">
+    <header><h2>Numbered Deck</h2>${hex(s.numDeck.length)}</header>
+    <div class="numlayout">
+      <div>
+        <form class="row" data-form="reveal">
+          <input type="number" id="numq" min="101" max="148" placeholder="Card # (101–148)" style="width:180px">
+          <button class="primary" type="submit">Search &amp; reveal</button>
+        </form>
+        <div class="numgrid">${numBtns}</div>
+        <div class="legend">Blue underline = cards for this scenario (its jobs + crew). Dots = versions left in the deck; if there are two, one is picked at random. Grey = not in the deck.</div>
+      </div>
+      <div class="current">
+        ${s.numCurrent ? cardHTML(s.numCurrent, { tag: `#${CARDS[s.numCurrent].num}` }) + `<div class="actions">${cardActions(s.numCurrent)}</div>` : `<div class="emptyslot">Search a number to reveal it</div>`}
+      </div>
+    </div>
+  </section>`;
+
+  const hands = ["p1", "p2"].map(p => `
+    <section class="panel ${p}">
+      <header><h2>${esc(name(p))}'s Hand</h2>${hex(s.hands[p].length)}</header>
+      <div class="handcards">${s.hands[p].length ? s.hands[p].map(id => cardHTML(id, { tag: CARDS[id].kind === "num" ? `#${CARDS[id].num}` : "" })).join("") : `<span class="muted">Secrets, gear, crew and jobs gained from these decks show up here.</span>`}</div>
+    </section>`).join("");
+
+  document.getElementById("app").innerHTML = `
+  <div class="topbar">
+    ${logo}
+    <div class="info">
+      <span class="scen-name">${esc(sc.name)}</span>
+      <span class="meta">${stars(sc.stars)}</span>
+      <span class="meta">${d.label} · fame goal ${hex(d.fame)}</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button data-a="undo" ${history.length ? "" : "disabled"} title="Ctrl/Cmd+Z">↶ Undo</button>
+      <button data-a="pile" data-pile="removed">Removed (${s.removed.length})</button>
+      <button data-a="log">Log</button>
+      <button data-a="newGame">New game</button>
+    </div>
+  </div>
+  <main class="board"><div class="stack">${sheet}${hands}</div><div class="stack"><div class="duo">${event}${jobs}</div>${num}</div></main>`;
+  ui.flip = null;
+  ui.sheetFlip = false;
+}
+
+function modalHTML(title, sub, body, { style = "" } = {}) {
+  return `<div class="modalback" data-a="close"><div class="modal panel" data-stop style="${style}">
+    <header><h2>${title}</h2>${sub ? `<span class="sub">${sub}</span>` : ""}<button class="x" data-a="close">✕</button></header>
+    ${body}
+  </div></div>`;
+}
+
+function renderOverlay() {
+  const el = document.getElementById("overlay");
+  let html = "";
+  const m = ui.modal;
+  if (state && m) {
+    if (m.type === "card" && where(m.id)) {
+      const c = CARDS[m.id];
+      const w = where(m.id);
+      const loc = { eventCurrent: "Current event", numCurrent: "Revealed", p1: `${name("p1")}'s hand`, p2: `${name("p2")}'s hand`, eventDiscard: "Event discard pile", removed: "Removed from game", jobDeck: "Job market", numDeck: "Numbered deck", eventDeck: "Event deck" }[w];
+      html += modalHTML(c.kind === "num" ? `Card #${c.num}` : c.kind === "job" ? "Co-op Job" : "Co-op Event", esc(loc),
+        `<div class="bigcard">${cardHTML(m.id, { zoom: false })}<div class="col">${cardActions(m.id, { big: true })}</div></div>`);
+    } else if (m.type === "pile") {
+      const ids = m.pile === "eventDiscard" ? state.eventDiscard.slice().reverse() : state.removed.slice().reverse();
+      html += modalHTML(m.pile === "eventDiscard" ? "Event Discard Pile" : "Removed from Game", `${ids.length} cards${m.pile === "eventDiscard" ? " · newest first" : ""}`,
+        `<div class="pilegrid">${ids.length ? ids.map(id => cardHTML(id)).join("") : `<span class="muted">Nothing here yet.</span>`}</div>`);
+    } else if (m.type === "sheet") {
+      const sc = SCEN[state.scenario];
+      html += modalHTML(`${esc(sc.name)} · Side ${state.side}`, "",
+        `<div class="row" style="margin-bottom:12px"><button class="primary" data-a="flipSheet">⇆ Flip to side ${state.side === "A" ? "B" : "A"}</button></div>
+        <div class="bigamb">${sheetHTML(sc, state.side)}</div>`);
+    } else if (m.type === "log") {
+      html += modalHTML("Game Log", "", `<div class="log">${state.log.map(l => `<div><time>${l.t}</time>${esc(l.msg)}</div>`).join("")}</div>`);
+    } else if (m.type === "confirmNew") {
+      html += modalHTML("Start a New Game?", "",
+        `<p style="margin:0 0 14px">This goes back to scenario setup. Your current game stays saved until you start a new one.</p>
+        <div class="row" style="justify-content:flex-end"><button data-a="close">Cancel</button><button class="primary" data-a="toSetup">Go to setup</button></div>`,
+        { style: "max-width:460px" });
+    }
+  }
+  if (state && state.lost) {
+    html += `<div class="banner lost"><div class="box"><h2 class="title-outline">Event Deck Empty</h2>
+      <p>A player couldn't draw from the Co-op Event Deck, so the game is over and both players have lost.</p>
+      <div class="row" style="justify-content:center"><button data-a="undo">↶ Undo last action</button><button data-a="dismissLost">View board</button><button class="primary" data-a="toSetup">New game</button></div></div></div>`;
+  } else if (state && state.won) {
+    html += `<div class="banner won"><div class="box"><h2 class="title-outline">Scenario Complete!</h2>
+      <p>The final job is marked on side B. If you finished it before the event deck ran out, you win together.</p>
+      <div class="row" style="justify-content:center"><button data-a="undo">↶ Undo</button><button class="primary" data-a="dismissWon">Back to board</button></div></div></div>`;
+  }
+  if (ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
+  el.innerHTML = html;
+}
+
+function render() {
+  applyPlayerColors(state ? (state.colors || DEFAULT_COLORS) : ui.setup.colors);
+  if (state) renderGame(); else renderSetup();
+  renderOverlay();
+}
+
+// ------------------------------------------------------------------ events
+document.addEventListener("click", e => {
+  const zoom = e.target.closest("[data-zoom]");
+  const t = e.target.closest("[data-a]");
+  if (zoom && (!t || zoom.contains(t) === false || t === zoom)) {
+    ui.modal = { type: "card", id: zoom.dataset.zoom };
+    renderOverlay();
+    return;
+  }
+  if (!t) return;
+  if (t.dataset.a === "close" && e.target.closest("[data-stop]") && !e.target.closest('button[data-a="close"]')) return;
+  const a = t.dataset.a, id = t.dataset.id;
+  switch (a) {
+    case "pickScen": ui.setup.scenario = id; syncNames(); render(); break;
+    case "pickDiff": ui.setup.difficulty = id; syncNames(); render(); break;
+    case "pickColor": ui.setup.colors[t.dataset.p] = t.dataset.color; syncNames(); render(); break;
+    case "start": {
+      syncNames();
+      newGame(ui.setup.scenario, ui.setup.difficulty, { p1: ui.setup.p1.trim() || "Player 1", p2: ui.setup.p2.trim() || "Player 2" }, { ...ui.setup.colors });
+      document.getElementById("page").scrollTop = 0;
+      render();
+      break;
+    }
+    case "resume": state = loadSaved(); history = []; render(); break;
+    case "newGame": ui.modal = { type: "confirmNew" }; renderOverlay(); break;
+    case "toSetup":
+      ui.modal = null;
+      if (state) { ui.setup.scenario = state.scenario; ui.setup.difficulty = state.difficulty; ui.setup.p1 = state.names.p1; ui.setup.p2 = state.names.p2; ui.setup.colors = { ...(state.colors || DEFAULT_COLORS) }; }
+      state = null; history = []; render(); break;
+    case "close": ui.modal = null; renderOverlay(); break;
+    case "undo": undo(); break;
+    case "draw": A.drawEvent(); break;
+    case "defeated": A.defeatedDiscard(); break;
+    case "swapActive": A.setActive(other(state.active)); break;
+    case "reveal": {
+      const before = state.numCurrent;
+      A.revealNum(t.dataset.n);
+      // opened from a scenario sheet: show the card right away instead of down in the numbered deck
+      if (t.closest(".amb") && state.numCurrent && state.numCurrent !== before) { ui.modal = { type: "card", id: state.numCurrent }; renderOverlay(); }
+      break;
+    }
+    case "jobShuffle": A.jobShuffle(); break;
+    case "jobBottom": A.jobTopToBottom(); break;
+    case "jobGain": A.jobGain(t.dataset.p); break;
+    case "move": A.move(id, t.dataset.dest); break;
+    case "rotate": A.rotate(id); break;
+    case "whole": A.toggleWhole(id); break;
+    case "dot": A.toggleDot(t.dataset.side, Number(t.dataset.i)); break;
+    case "flipSheet": A.flipSheet(); break;
+    case "bigSheet": ui.modal = { type: "sheet" }; renderOverlay(); break;
+    case "fame": A.fame(t.dataset.p, Number(t.dataset.d)); break;
+    case "pile": ui.modal = { type: "pile", pile: t.dataset.pile }; renderOverlay(); break;
+    case "log": ui.modal = { type: "log" }; renderOverlay(); break;
+    case "dismissLost": state.lost = false; save(); render(); break;
+    case "dismissWon": state.won = false; save(); render(); break;
+  }
+});
+document.addEventListener("submit", e => {
+  if (e.target.dataset.form === "reveal") {
+    e.preventDefault();
+    const v = document.getElementById("numq").value;
+    A.revealNum(v);
+    const inp = document.getElementById("numq");
+    if (inp) { inp.focus(); }
+  }
+});
+document.addEventListener("change", e => {
+  if (e.target.dataset.colorFor) { syncNames(); render(); }
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "n1") ui.setup.p1 = e.target.value;
+  if (e.target.id === "n2") ui.setup.p2 = e.target.value;
+  if (e.target.dataset.colorFor) { ui.setup.colors[e.target.dataset.colorFor] = e.target.value; applyPlayerColors(ui.setup.colors); }
+});
+function syncNames() {
+  const n1 = document.getElementById("n1"), n2 = document.getElementById("n2");
+  if (n1) ui.setup.p1 = n1.value;
+  if (n2) ui.setup.p2 = n2.value;
+}
+document.addEventListener("keydown", e => {
+  if (!state) return;
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
+  if (e.target.matches("input")) return;
+  if (e.key === "Escape" && ui.modal) { ui.modal = null; renderOverlay(); return; }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key.toLowerCase() === "d" && !ui.modal) A.drawEvent();
+  if (e.key === "/" || e.key.toLowerCase() === "n") { const i = document.getElementById("numq"); if (i) { e.preventDefault(); i.focus(); } }
+});
+
+state = null;
+render();
+</script>
+</body>
+</html>
