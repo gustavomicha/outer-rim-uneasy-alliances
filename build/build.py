@@ -216,6 +216,58 @@ def rulebook_frame():
     return "data:image/webp;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
+def favicon():
+    """Tab icon: the four-pointed fame star over a starfield."""
+    svg = (ROOT / "build" / "assets" / "favicon.svg").read_bytes()
+    return "data:image/svg+xml;base64," + base64.b64encode(svg).decode()
+
+
+def touch_icon(size=180, ss=4):
+    """The same icon as a PNG for 'add to home screen'. Drawn here rather than converted from the
+    SVG, because the SVG converter drops gradients."""
+    from PIL import ImageDraw, ImageOps
+
+    n = size * ss
+    space = ImageOps.colorize(Image.radial_gradient("L").resize((n, n)), (40, 64, 95), (7, 12, 22))
+    corners = Image.new("L", (n, n), 0)
+    ImageDraw.Draw(corners).rounded_rectangle((0, 0, n - 1, n - 1), radius=int(n * 0.2), fill=255)
+    icon = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    icon.paste(space, (0, 0), corners)
+
+    draw = ImageDraw.Draw(icon)
+    for x, y, r, a in [(17, 20, 1.5, 230), (80, 16, 1.1, 180), (86, 45, 1.6, 215), (14, 62, 1.2, 165),
+                       (30, 85, 1.5, 205), (70, 82, 1.1, 155), (52, 12, 1.0, 130)]:
+        x, y, r = x / 100 * n, y / 100 * n, r / 100 * n
+        draw.ellipse((x - r, y - r, x + r, y + r), fill=(219, 231, 245, a))
+
+    def bezier(p0, c0, c1, p1, steps=40):
+        for i in range(steps):
+            t = i / steps
+            u = 1 - t
+            yield tuple((u ** 3 * a + 3 * u * u * t * b + 3 * u * t * t * c + t ** 3 * d) / 100 * n
+                        for a, b, c, d in zip(p0, c0, c1, p1))
+
+    tips = [(50, 8), (92, 50), (50, 92), (8, 50)]
+    ctrl = [((54.5, 37), (62, 45.5)), ((62, 54.5), (54.5, 63)), ((45.5, 63), (38, 54.5)), ((38, 45.5), (45.5, 37))]
+    points = []
+    for i, (c0, c1) in enumerate(ctrl):
+        points += list(bezier(tips[i], c0, c1, tips[(i + 1) % 4]))
+
+    gold = Image.new("RGBA", (n, n))
+    gd = ImageDraw.Draw(gold)
+    for y in range(n):  # top-to-bottom gold gradient
+        t = y / n
+        gd.line([(0, y), (n, y)], fill=(int(255 - 79 * t), int(234 - 107 * t), int(169 - 146 * t), 255))
+    star = Image.new("L", (n, n), 0)
+    ImageDraw.Draw(star).polygon(points, fill=255)
+    icon.paste(gold, (0, 0), star)
+    draw.line(points + [points[0]], fill=(109, 77, 10, 255), width=max(2, int(n * 0.014)), joint="curve")
+
+    buf = io.BytesIO()
+    icon.resize((size, size), Image.LANCZOS).save(buf, "PNG", optimize=True)
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+
+
 FONT_FACES = [  # family, file, weight range, style
     ("Saira Condensed", "SairaCondensed-600.woff2", "600", "normal"),
     ("Saira Condensed", "SairaCondensed-700.woff2", "700", "normal"),
@@ -235,7 +287,8 @@ def font_css():
 
 
 data = {"scenarios": scenarios, "events": events, "numbered": numbered, "jobs": jobs, "icons": {"handshake": handshake_icon()}}
-extras = {"/*__FONTS__*/": font_css(), "__FRAME__": rulebook_frame()}
+extras = {"/*__FONTS__*/": font_css(), "__FRAME__": rulebook_frame(),
+          "__FAVICON__": favicon(), "__TOUCHICON__": touch_icon()}
 for template, out in TARGETS:
     html = template.read_text()
     html = html.replace("/*__DATA__*/null", json.dumps(data))
