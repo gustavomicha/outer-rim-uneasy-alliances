@@ -1,6 +1,6 @@
 // Service worker: keeps the whole app on the device so it works offline and can be installed.
 // CACHE is stamped with a hash of index.html at build time, so a new build replaces the old copy.
-const CACHE = "uneasy-alliances-2e845b703b02";
+const CACHE = "uneasy-alliances-0a86b2cd27a5";
 const ASSETS = ["./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {

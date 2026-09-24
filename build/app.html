@@ -367,6 +367,25 @@ kbd {
 .rules .source { margin-top: 24px; padding-top: 14px; border-top: 2px solid var(--blue); }
 .rules a { color: var(--blue); font-weight: 600; }
 
+/* ---------- install / download ---------- */
+.install { width: min(620px, 88vw); font-size: 15px; line-height: 1.5; }
+.install p { margin: 8px 0; }
+.install ul { margin: 8px 0; padding-left: 20px; }
+.install li { margin: 6px 0; }
+.install li::marker { color: var(--blue); }
+.install h4 { font: 600 16px var(--head); color: var(--blue); margin: 18px 0 4px; padding-bottom: 3px; display: inline-block;
+  background: radial-gradient(circle, var(--blue) 1.1px, transparent 1.4px) 0 100% / 6px 4px repeat-x; }
+.install .big { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 14px 0 4px; }
+.install .big button, .install .big a.btn { font-size: 17px; padding: 7px 20px; }
+a.btn {
+  display: inline-block; text-decoration: none; font: 600 15px var(--head); letter-spacing: .3px; color: var(--blue);
+  background: rgba(255,255,255,.72); border: 2px solid var(--blue); border-radius: 999px; padding: 4px 14px;
+}
+a.btn:hover { background: #fff; box-shadow: 0 1px 6px rgba(43,110,143,.35); }
+a.btn.primary { background: var(--blue); color: #fff; }
+a.btn.primary:hover { background: var(--blue-dark); }
+.install .note { color: var(--muted); font-size: 14px; }
+
 /* ---------- setup ---------- */
 .setup { max-width: 1180px; margin: 0 auto; padding: 26px 26px 50px; }
 .biglogo { display: flex; flex-direction: column; align-items: center; line-height: 1; margin: 6px 0 8px; }
@@ -509,7 +528,7 @@ function applyPlayerColors(colors) {
 // ------------------------------------------------------------------ state
 let state = null;
 let history = [];
-const ui = { modal: null, flip: null, sheetFlip: false, toast: null, setup: { scenario: null, difficulty: "medium", p1: "Player 1", p2: "Player 2", colors: { ...DEFAULT_COLORS } } };
+const ui = { installPrompt: null, installed: false, modal: null, flip: null, sheetFlip: false, toast: null, setup: { scenario: null, difficulty: "medium", p1: "Player 1", p2: "Player 2", colors: { ...DEFAULT_COLORS } } };
 
 function save() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
@@ -908,7 +927,10 @@ function renderSetup() {
       <span class="ua">UNEASY ALLIANCES</span><span class="exp">CO-OP EXPANSION</span>
     </div>
     <p class="intro">A fan-made cooperative expansion by Mike Schoenfeld (v2.2.01). Set up the base game as normal (no Ambitions or Favors), then choose your scenario here.</p>
-    <p style="text-align:center;margin:0 0 6px"><button data-a="rules">Read the rules of the expansion</button></p>
+    <p style="text-align:center;margin:0 0 6px">
+      <button data-a="rules">Read the rules of the expansion</button>
+      <button data-a="install">⬇ Click here to play locally</button>
+    </p>
     ${saved ? `<section class="panel summary"><header><h2>Saved Game</h2></header><div class="inner"><div><strong>${esc(SCEN[saved.scenario].name)}</strong><br><span class="muted">${DIFF[saved.difficulty].label} · ${saved.eventDeck.length} event cards left</span></div><div class="spacer"></div><button class="primary" data-a="resume">Continue game</button></div></section>` : ""}
     <div class="step"><h2 class="title-outline">1 · Scenario</h2></div>
     <div class="scengrid">${scenTiles}</div>
@@ -1045,6 +1067,37 @@ function renderGame() {
   ui.sheetFlip = false;
 }
 
+function installHTML() {
+  const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  let top;
+  if (standalone) {
+    top = `<p><b>This app is already installed</b> — you are running it in its own window.</p>`;
+  } else if (ui.installPrompt) {
+    top = `<div class="big"><button class="primary" data-a="doInstall">Install app</button>
+      <span class="note">Adds it to your desktop or home screen and opens without the browser bar.</span></div>`;
+  } else if (ios) {
+    top = `<p>On iPhone and iPad, add it from Safari: <b>Share</b> → <b>Add to Home Screen</b>.</p>`;
+  } else {
+    top = `<p>Your browser does not offer an install button here. In Chrome or Edge look for the install icon
+      at the right of the address bar, or the browser menu → <b>Install Uneasy Alliances</b>. In Safari on a Mac,
+      use <b>File → Add to Dock</b>.</p>`;
+  }
+  return `<div class="install">
+    <p>Keep the app on your device and play with no connection at all. There are two ways, and both work offline.</p>
+    <h4>Install it as an app</h4>
+    ${top}
+    <h4>Or download the file</h4>
+    <div class="big"><a class="btn primary" href="index.html" download="uneasy-alliances.html">Download index.html</a>
+      <span class="note">About 6.6 MB.</span></div>
+    <p>Everything — all the cards, fonts and icons — lives inside that single file. Save it anywhere and open it by
+      double-clicking; it needs no server and no internet. Handy for keeping a copy with your game box, or passing it
+      to someone on a USB stick.</p>
+    <p class="note">Saved games live in the browser, per device. The installed app and the site share the same save,
+      because they are the same address; a downloaded file keeps its own.</p>
+  </div>`;
+}
+
 function modalHTML(title, sub, body, { style = "" } = {}) {
   return `<div class="modalback" data-a="close"><div class="modal panel" data-stop style="${style}">
     <header><h2>${title}</h2>${sub ? `<span class="sub">${sub}</span>` : ""}<button class="x" data-a="close">✕</button></header>
@@ -1056,7 +1109,9 @@ function renderOverlay() {
   const el = document.getElementById("overlay");
   let html = "";
   const m = ui.modal;
-  if (m && m.type === "rules") {
+  if (m && m.type === "install") {
+    html += modalHTML("Play Locally", "install it or download the file", installHTML());
+  } else if (m && m.type === "rules") {
     html += modalHTML("Uneasy Alliances · Rules", "co-op expansion summary", `<div class="rules" style="--hs:url('${DATA.icons.handshake}')">${RULES}</div>`);
   } else if (state && m) {
     if (m.type === "card" && where(m.id)) {
@@ -1156,6 +1211,13 @@ document.addEventListener("click", e => {
     case "pile": ui.modal = { type: "pile", pile: t.dataset.pile }; renderOverlay(); break;
     case "log": ui.modal = { type: "log" }; renderOverlay(); break;
     case "rules": ui.modal = { type: "rules" }; renderOverlay(); break;
+    case "install": ui.modal = { type: "install" }; renderOverlay(); break;
+    case "doInstall": {
+      const p = ui.installPrompt;
+      ui.installPrompt = null;
+      if (p) { p.prompt(); p.userChoice.then(() => { ui.modal = null; render(); }); }
+      break;
+    }
     case "dismissLost": state.lost = false; save(); render(); break;
     case "dismissWon": state.won = false; save(); render(); break;
   }
@@ -1194,6 +1256,11 @@ document.addEventListener("keydown", e => {
 
 state = null;
 render();
+
+// The browser tells us when it is willing to install the app; hold on to the event so the
+// "Download / install" button can trigger it later.
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); ui.installPrompt = e; });
+window.addEventListener("appinstalled", () => { ui.installPrompt = null; toast("App installed"); });
 
 // Offline support + "install app". Only when served from a web server: opening the single
 // index.html straight from disk already works offline, and has no service worker to register.
