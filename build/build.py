@@ -222,7 +222,7 @@ def favicon():
     return "data:image/svg+xml;base64," + base64.b64encode(svg).decode()
 
 
-def touch_icon(size=180, ss=4):
+def app_icon(size=180, ss=4):
     """The same icon as a PNG for 'add to home screen'. Drawn here rather than converted from the
     SVG, because the SVG converter drops gradients."""
     from PIL import ImageDraw, ImageOps
@@ -287,8 +287,38 @@ def font_css():
 
 
 data = {"scenarios": scenarios, "events": events, "numbered": numbered, "jobs": jobs, "icons": {"handshake": handshake_icon()}}
+
+
+def write_pwa_files(page_html):
+    """A manifest, two icons and a service worker, so browsers offer to install the app and it
+    keeps working offline. index.html on its own stays self-contained; these only add the install."""
+    import hashlib
+    for px in (192, 512):
+        raw = base64.b64decode(app_icon(px, ss=2).split(",")[1])
+        (ROOT / f"icon-{px}.png").write_bytes(raw)
+    manifest = {
+        "name": "Uneasy Alliances — Outer Rim Co-op",
+        "short_name": "Uneasy Alliances",
+        "description": "Playable version of the Uneasy Alliances fan-made cooperative expansion for Star Wars: Outer Rim.",
+        "start_url": "./",
+        "scope": "./",
+        "display": "standalone",
+        "orientation": "any",
+        "background_color": "#101a2e",
+        "theme_color": "#101a2e",
+        "icons": [
+            {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+            {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+            {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+        ],
+    }
+    (ROOT / "manifest.webmanifest").write_text(json.dumps(manifest, indent=2) + "\n")
+    version = hashlib.sha256(page_html.encode()).hexdigest()[:12]
+    sw = (ROOT / "build" / "assets" / "sw.js").read_text().replace("__CACHE__", f"uneasy-alliances-{version}")
+    (ROOT / "sw.js").write_text(sw)
+    print(f"-> manifest.webmanifest, sw.js (cache uneasy-alliances-{version}), icon-192.png, icon-512.png")
 extras = {"/*__FONTS__*/": font_css(), "__FRAME__": rulebook_frame(),
-          "__FAVICON__": favicon(), "__TOUCHICON__": touch_icon()}
+          "__FAVICON__": favicon(), "__TOUCHICON__": app_icon()}
 for template, out in TARGETS:
     html = template.read_text()
     html = html.replace("/*__DATA__*/null", json.dumps(data))
@@ -297,4 +327,6 @@ for template, out in TARGETS:
         html = html.replace(key, value)
     out.write_text(html)
     print(f"-> {out.name} {out.stat().st_size / 1e6:.1f} MB")
+    if out.name == "index.html":
+        write_pwa_files(html)
 print(f"events={len(events)} numbered={len(numbered)} jobs={len(jobs)}")

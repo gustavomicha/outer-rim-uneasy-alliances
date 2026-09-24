@@ -26,6 +26,23 @@ is saved in the browser, so closing the tab doesn't lose it.
 - **Co-op job market** — top card always face up, with shuffle, top-to-bottom and gain actions.
 - Undo (Ctrl/Cmd+Z), a game log, and a loss screen when the event deck runs out.
 
+## Installing it
+
+The site is a progressive web app, so you can install it and play with no connection at all.
+
+- **Desktop (Chrome / Edge):** open the link and click the install icon in the address bar, or use the
+  browser menu → *Install Uneasy Alliances*. It then opens in its own window, without browser tabs.
+- **Android (Chrome):** menu → *Add to Home screen* / *Install app*.
+- **iPhone / iPad (Safari):** Share → *Add to Home Screen*.
+- **No install at all:** save `index.html` from the repo and open it by double-clicking. The whole app —
+  cards, fonts and icons — lives inside that one file, so it needs nothing else.
+
+Once installed, a service worker keeps the app on the device and it starts offline. When a new version is
+published, it downloads in the background and a message invites you to reload.
+
+Your game is stored by the browser (localStorage), on that device and browser only. Installed and
+in-browser copies of the same URL share it; a downloaded local file keeps its own separate save.
+
 ## Credits
 
 - **Expansion design:** Mike Schoenfeld — *Uneasy Alliances* v2.2.01, shared on

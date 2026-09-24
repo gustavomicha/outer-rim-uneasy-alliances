@@ -6,6 +6,11 @@
 <title>Uneasy Alliances</title>
 <link rel="icon" href="__FAVICON__">
 <link rel="apple-touch-icon" href="__TOUCHICON__">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Uneasy Alliances">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#101a2e">
 <meta name="description" content="Playable web version of Uneasy Alliances, the fan-made cooperative expansion for Star Wars: Outer Rim.">
 <style>
@@ -1083,6 +1088,18 @@ document.addEventListener("keydown", e => {
 
 state = null;
 render();
+
+// Offline support + "install app". Only when served from a web server: opening the single
+// index.html straight from disk already works offline, and has no service worker to register.
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    const had = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (had) toast("A new version was downloaded — reload to use it");
+    });
+  });
+}
 </script>
 </body>
 </html>
