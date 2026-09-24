@@ -348,6 +348,25 @@ kbd {
   padding: 6px 20px; border-radius: 999px; z-index: 70; font: 600 16px var(--head); box-shadow: 0 6px 20px rgba(0,0,0,.35);
 }
 
+/* ---------- rules ---------- */
+.rules { width: min(760px, 88vw); font-size: 15px; line-height: 1.5; }
+.rules h3 { font: 600 18px var(--head); color: #fff; background: var(--blue); border-radius: 999px; padding: 4px 20px; display: inline-block; margin: 22px 0 10px; }
+.rules h3:first-child { margin-top: 4px; }
+.rules h4 { font: 600 16px var(--head); color: var(--blue); margin: 16px 0 4px; padding-bottom: 3px; display: inline-block;
+  background: radial-gradient(circle, var(--blue) 1.1px, transparent 1.4px) 0 100% / 6px 4px repeat-x; }
+.rules p { margin: 8px 0; }
+.rules ul { margin: 8px 0; padding-left: 20px; }
+.rules li { margin: 5px 0; }
+.rules li::marker { color: var(--blue); }
+.rules b { font-weight: 700; }
+.rules .hs-inline { display: inline-block; width: 22px; height: 14px; vertical-align: -2px; background: #26292c;
+  -webkit-mask: var(--hs) center / contain no-repeat; mask: var(--hs) center / contain no-repeat; }
+.rules table { border-collapse: collapse; margin: 10px 0; width: 100%; }
+.rules th, .rules td { border: 1px solid rgba(43,110,143,.35); padding: 5px 10px; text-align: left; }
+.rules th { background: var(--blue); color: #fff; font: 600 15px var(--head); }
+.rules .source { margin-top: 24px; padding-top: 14px; border-top: 2px solid var(--blue); }
+.rules a { color: var(--blue); font-weight: 600; }
+
 /* ---------- setup ---------- */
 .setup { max-width: 1180px; margin: 0 auto; padding: 26px 26px 50px; }
 .biglogo { display: flex; flex-direction: column; align-items: center; line-height: 1; margin: 6px 0 8px; }
@@ -733,6 +752,88 @@ function cardActions(id, { big = false } = {}) {
 const hex = v => `<span class="hex"><span>${v}</span></span>`;
 const logo = `<div class="logo"><span class="sw">STAR WARS</span><span class="or">OUTER RIM</span><span class="ua">UNEASY ALLIANCES</span></div>`;
 
+const RULES = `
+<h3>The Expansion</h3>
+<p><i>Uneasy Alliances</i> turns <i>Star Wars: Outer Rim</i> into a cooperative game for two players. It is built for the
+base game together with the <i>Unfinished Business</i> expansion, and was not tested with the base game alone.
+It <b>cannot</b> be used with Ambitions or Favors: the cooperative scenarios take the place of ambitions, and favors
+would be overpowered in a co-op game.</p>
+
+<h3>Setup</h3>
+<ul>
+  <li>Set the game up as normal, choose characters and gain starting cards and credits.</li>
+  <li>Together, choose one of the <b>8 cooperative scenarios</b>. The stars show the difficulty, from 1 (easiest)
+      to 4 (hardest).</li>
+  <li>Agree on a fame goal, and remove that many cards from the Cooperative Event Deck:</li>
+</ul>
+<table>
+  <tr><th>Difficulty</th><th>Fame goal</th><th>Event cards removed</th></tr>
+  <tr><td>Easy</td><td>6 fame</td><td>Remove 10</td></tr>
+  <tr><td>Medium</td><td>8 fame</td><td>Remove 6</td></tr>
+  <tr><td>Hard</td><td>10 fame</td><td>Remove 2</td></tr>
+</table>
+<ul>
+  <li>Shuffle the scenario's <b>thematic event cards</b> into the event deck. The number depends on the difficulty:
+      1★ = 3 cards, 2★ = 5, 3★ = 7, 4★ = 9. Only use the cards matching the chosen scenario.</li>
+  <li>The 8 <b>cooperative jobs</b> (yellow, with the job symbol) form a 7th market deck.</li>
+</ul>
+<p><b>You win</b> if you complete the chosen scenario before the Cooperative Event Deck runs out.</p>
+
+<h3>Cooperative Scenarios</h3>
+<p>Each scenario gives a set of objectives you work through together. Some must be completed by <b>each player</b>,
+some by <b>either player</b>, and some by <b>both players together</b>. Goals work like ambition goals: a dash can be
+completed at any time, numbered goals must be completed in order, and <b>∞</b> goals are ongoing — they only count
+while their criteria are met. When every goal on side A is complete, flip the sheet to side B.</p>
+<h4>Simultaneous jobs <span class="hs-inline"></span></h4>
+<p>Each scenario has a pair of jobs that must be completed at the same time. Once one player attempts one of them,
+the other player must attempt the other on their next turn. If they do not complete it on that turn, the second job
+automatically fails and cannot be attempted again.</p>
+<h4>The Cooperative Objective Marker</h4>
+<p>After both players have attempted those jobs, place the marker on the location matching the number of goal tokens
+on the sheet. Those locations assume a standard planetary setup. With a randomized setup, use this instead:</p>
+<ul>
+  <li><b>0 markers</b> — a planet at least 11 spaces away from the location of the final job.</li>
+  <li><b>1 marker</b> — a planet at least 8 spaces away.</li>
+  <li><b>2 markers</b> — a planet at least 5 spaces away.</li>
+</ul>
+
+<h3>Cooperative Event Deck</h3>
+<ul>
+  <li>Each player <b>draws one card at the end of their turn</b> and resolves it. Each card has a <b>Planet</b> half and a
+      <b>Navpoint</b> half: resolve the one matching the space your character is in.</li>
+  <li>Effects can be negative, neutral or positive, and give you an extra interaction each turn.</li>
+  <li>The deck is also the game's timer. <b>If a player cannot draw a card, the game is over and both players lose.</b></li>
+  <li>If your character is <b>defeated</b>, discard the top card of the deck instead of drawing it.</li>
+  <li>Some cards show gear, a mod, cargo or a secret printed upside down at the bottom: that is the card you gain.</li>
+</ul>
+<h4>Scenario-specific crew</h4>
+<p>The thematic cards can offer you a potential crew member as an end-of-turn event. If you do not gain that crew
+member on the turn they are drawn, they are not available at any other point in the game.</p>
+
+<h3>Cooperative Jobs</h3>
+<p>The 8 cooperative jobs are designed to be completed by two players working together, and make up a 7th market
+deck. Each names a destination and a card to resolve, and both players share the reward.</p>
+
+<h3>What This App Does for You</h3>
+<ul>
+  <li>Builds the event deck for the scenario and difficulty you pick, removing the right number of generic cards
+      at random and shuffling in the matching thematic cards.</li>
+  <li>Draws events, passes the turn, handles the "defeated" discard, and ends the game when the deck runs out.</li>
+  <li>Dims the half of a thematic card that belongs to the other scenario.</li>
+  <li>Picks at random between the two versions of a numbered card when both exist.</li>
+  <li>Tracks goal tokens, fame and each player's hand, with undo and a game log.</li>
+  <li>One correction: the Jabba event card printed "Resolve card #148" (Erskin Semaj); the Gammorean it describes is
+      Jubnuck, <b>#143</b>, which is what the app shows.</li>
+</ul>
+
+<div class="source">
+  <p><b>Uneasy Alliances</b> is a fan-made expansion by <b>Mike Schoenfeld</b> (v2.2.01), with playtesting by
+  Michelle Schoenfeld, Kevin Schoenfeld, Randy Comstock and Tony Teshera. The rules above are a summary of his
+  expansion document — the original post, the printable PDF and any newer version are here:</p>
+  <p><a href="https://boardgamegeek.com/thread/3058093/star-wars-outer-rim-uneasy-alliances-a-fan-made-co" target="_blank" rel="noopener">
+  Star Wars Outer Rim: Uneasy Alliances — A Fan Made Cooperative Expansion (BoardGameGeek)</a></p>
+</div>`;
+
 const FAME_ICON = `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 2 C55 36 64 45 98 50 C64 55 55 64 50 98 C45 64 36 55 2 50 C36 45 45 36 50 2 Z"/></svg>`;
 
 // one side of a scenario sheet, in the style of an Unfinished Business ambition sheet
@@ -807,6 +908,7 @@ function renderSetup() {
       <span class="ua">UNEASY ALLIANCES</span><span class="exp">CO-OP EXPANSION</span>
     </div>
     <p class="intro">A fan-made cooperative expansion by Mike Schoenfeld (v2.2.01). Set up the base game as normal (no Ambitions or Favors), then choose your scenario here.</p>
+    <p style="text-align:center;margin:0 0 6px"><button data-a="rules">Read the rules of the expansion</button></p>
     ${saved ? `<section class="panel summary"><header><h2>Saved Game</h2></header><div class="inner"><div><strong>${esc(SCEN[saved.scenario].name)}</strong><br><span class="muted">${DIFF[saved.difficulty].label} · ${saved.eventDeck.length} event cards left</span></div><div class="spacer"></div><button class="primary" data-a="resume">Continue game</button></div></section>` : ""}
     <div class="step"><h2 class="title-outline">1 · Scenario</h2></div>
     <div class="scengrid">${scenTiles}</div>
@@ -933,6 +1035,7 @@ function renderGame() {
     <div class="actions">
       <button data-a="undo" ${history.length ? "" : "disabled"} title="Ctrl/Cmd+Z">↶ Undo</button>
       <button data-a="pile" data-pile="removed">Removed (${s.removed.length})</button>
+      <button data-a="rules">Rules</button>
       <button data-a="log">Log</button>
       <button data-a="newGame">New game</button>
     </div>
@@ -953,7 +1056,9 @@ function renderOverlay() {
   const el = document.getElementById("overlay");
   let html = "";
   const m = ui.modal;
-  if (state && m) {
+  if (m && m.type === "rules") {
+    html += modalHTML("Uneasy Alliances · Rules", "co-op expansion summary", `<div class="rules" style="--hs:url('${DATA.icons.handshake}')">${RULES}</div>`);
+  } else if (state && m) {
     if (m.type === "card" && where(m.id)) {
       const c = CARDS[m.id];
       const w = where(m.id);
@@ -1050,6 +1155,7 @@ document.addEventListener("click", e => {
     case "fame": A.fame(t.dataset.p, Number(t.dataset.d)); break;
     case "pile": ui.modal = { type: "pile", pile: t.dataset.pile }; renderOverlay(); break;
     case "log": ui.modal = { type: "log" }; renderOverlay(); break;
+    case "rules": ui.modal = { type: "rules" }; renderOverlay(); break;
     case "dismissLost": state.lost = false; save(); render(); break;
     case "dismissWon": state.won = false; save(); render(); break;
   }
